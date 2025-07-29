@@ -1,0 +1,10 @@
+{
+  "background_color": "#ffffff",
+  "description": "SpaceInvadersGame",
+  "display": "standalone",
+  "name": "SpaceInvadersGame",
+  "short_name": "SpaceInvadersGame",
+  "start_url": "/index.html",
+  "theme_color": "#ffffff",
+  "scope": "/"
+}
