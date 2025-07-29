@@ -1,3 +1,4 @@
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
 using SpaceInvadersGame.Models;
 
@@ -5,7 +6,6 @@ namespace SpaceInvadersGame;
 
 public sealed partial class MainPage : Page
 {
-
     private readonly GameManager _gameManager;
     private readonly InputManager _inputManager;
     
@@ -13,12 +13,11 @@ public sealed partial class MainPage : Page
     
     private DateTime _lastFrameTime;
     
-    private Image playerImage;
     public MainPage()
     {
         this.InitializeComponent();
-        _gameManager = new GameManager(GameCanvas);
-        _inputManager = new InputManager(GameCanvas);
+        _inputManager = new InputManager();
+        _gameManager = new GameManager(_inputManager);
         
         this.Loaded += OnPageLoaded;
         this.Unloaded += OnPageUnloaded;
@@ -27,20 +26,39 @@ public sealed partial class MainPage : Page
     private void OnPageLoaded(object sender, RoutedEventArgs e)
     {
         // Start loop when the page is ready
+        this.Focus(FocusState.Programmatic);
         
         _gameManager.Start();
         _lastFrameTime = DateTime.Now;
-        CompositionTarget.Rendering += OnRendering;
+        
+        this.KeyDown += OnPageKeyDown;
+        this.KeyUp += OnPageKeyUp;
 
-        playerImage = new Image
+        Image playerImage = new Image
         {
             Source = new BitmapImage(new Uri("ms-appx:///Assets/Corinthians_simbolo.png")),
             Width = 50,
             Height = 50,
         };
         
-        Canvas.SetZIndex(playerImage, 10);
+        GameObject player = new GameObject(playerImage, new Player());
+        _gameObjects.Add(player);
+        _gameManager.AddGameObject(player);
+        
+        Canvas.SetZIndex(player.View, 10);
         GameCanvas.Children.Add(playerImage);
+        
+        CompositionTarget.Rendering += OnRendering;
+    }
+
+    private void OnPageKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        _inputManager.KeyDown(e.Key);
+    }
+    
+    private void OnPageKeyUp(object sender, KeyRoutedEventArgs e)
+    {
+        _inputManager.KeyUp(e.Key);
     }
     
     private void OnPageUnloaded(object sender, RoutedEventArgs e)
