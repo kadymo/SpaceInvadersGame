@@ -5,8 +5,8 @@ public class Player
 {
     public double PositionX { get; set; }
     public double PositionY { get; set; }
-    public double Health { get; set; }
-    public double Speed { get; set; }
+    public double Health { get; set; } = 100;
+    public double Speed { get; set; } = 200;
     
     public event Action OnPlayerDied;
 
