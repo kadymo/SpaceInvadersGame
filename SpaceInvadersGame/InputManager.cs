@@ -1,16 +1,23 @@
-﻿namespace SpaceInvadersGame;
+﻿using Windows.System;
+
+namespace SpaceInvadersGame;
 
 public class InputManager
 {
-    private Canvas _gameCanvas;
-
-    public InputManager(Canvas gameCanvas)
+    private readonly HashSet<VirtualKey> _pressedKeys = new HashSet<VirtualKey>();
+    
+    public void KeyUp(VirtualKey key)
     {
-        _gameCanvas = gameCanvas;
+        _pressedKeys.Remove(key);
     }
     
-    public void HandleInputKeys()
+    public void KeyDown(VirtualKey key)
     {
-        
+        _pressedKeys.Add(key);
+    }
+
+    public bool isKeyPressed(VirtualKey key)
+    {
+        return _pressedKeys.Contains(key);
     }
 }
