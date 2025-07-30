@@ -25,5 +25,11 @@
       SkiaRenderer;
     </UnoFeatures>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Presentation\MainPage.xaml.cs">
+      <DependentUpon>MainPage.xaml</DependentUpon>
+      <IsDefaultItem>true</IsDefaultItem>
+    </Compile>
+  </ItemGroup>
 
 </Project>
