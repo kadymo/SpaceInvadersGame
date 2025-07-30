@@ -5,9 +5,7 @@
       Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
   <ScrollViewer IsTabStop="True">
       <Grid>
-          <Canvas x:Name="GameCanvas" Background="#008000">
-              <Rectangle Fill="#000"  Width="800" Height="150" Canvas.Left="0" Canvas.Top="0" Canvas.ZIndex="0" />
-          </Canvas>
+          <Canvas x:Name="GameCanvas" Background="#000"/>
       </Grid>
   </ScrollViewer>
 </Page>
