@@ -29,6 +29,7 @@ public sealed partial class MainPage : Page
         this.Focus(FocusState.Programmatic);
         
         _gameManager.Start();
+        _gameManager.OnProjectileFired += CreateProjectileView;
         _lastFrameTime = DateTime.Now;
         
         this.KeyDown += OnPageKeyDown;
@@ -128,5 +129,26 @@ public sealed partial class MainPage : Page
                 GameCanvas.Children.Add(enemyImage);
             }
         }
+    }
+
+    private void CreateProjectileView(object sender, Projectile projectileModel)
+    {
+        Image projectileImage = new Image
+        {
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Projectile.gif")),
+            Width = 50,
+            Height = 50,
+        };
+        
+        GameObject projectileGameObject = new GameObject(projectileImage, projectileModel);
+        _gameObjects.Add(projectileGameObject);
+        _gameManager.AddGameObject(projectileGameObject);
+        
+        Canvas.SetZIndex(projectileGameObject.View, 10);
+        GameCanvas.Children.Add(projectileImage);
+        
+        // Draw
+        Canvas.SetLeft(projectileGameObject.View, projectileModel.PositionX);
+        Canvas.SetLeft(projectileGameObject.View, projectileModel.PositionY);
     }
 }
