@@ -1,4 +1,5 @@
-﻿using Windows.System;
+﻿using System.Diagnostics.CodeAnalysis;
+using Windows.System;
 using Microsoft.UI.Xaml.Media.Imaging;
 using SpaceInvadersGame.Models;
 
@@ -12,14 +13,25 @@ public class GameManager
     
     private readonly InputManager _inputManager;
     
+    private float _screenWidth;
+    private float _screenHeight;
+    private bool _canShoot = true;
+    
     private DateTime _lastUpdate;
     private bool _isGameRunning;
     
     public event EventHandler<Projectile> OnProjectileFired;
+    public event EventHandler<GameObject> OnProjectileExceededScreen;
     
     public GameManager(InputManager inputManager)
     {
         _inputManager = inputManager;
+
+        this.OnProjectileExceededScreen += (sender, gameObject) =>
+        {
+            _gameObjects.Remove(gameObject);
+            _canShoot = true;
+        };
     }
 
     public void AddGameObject(GameObject gameObject)
@@ -53,22 +65,38 @@ public class GameManager
         _isGameRunning = false;
     }
     
-    // Method called every frame
+    // Method called every frame]
+    
+
+    public void SetScreenBounds(float width, float height)
+    {
+        _screenWidth = width;
+        _screenHeight = height;
+    }
+    
     public void Update(TimeSpan deltaTime)
     {
+        
         if (!_isGameRunning) return;
         float deltaTimeSeconds = (float)deltaTime.TotalSeconds;
         
         var playerModel = _player.Model as Player;
-        var projectileModel = new Projectile
-        {
-            PositionX = playerModel.PositionX,
-            PositionY = playerModel.PositionY,
-        };
-        // var projectileModel = _projectile.Model as Projectile;
-        // playerModel.PositionX += playerModel.Speed * deltaTimeSeconds;
+        // Projectile projectileModel = null;
         
         // Process input
+        GameObject projectileGameObject = _gameObjects.Find(go => go.Model is Projectile);
+        
+        if (projectileGameObject != null && projectileGameObject.Model is Projectile projectileModel)
+        {
+            projectileModel.PositionY -= projectileModel.Speed * deltaTimeSeconds;
+            
+            if (projectileModel.PositionY + projectileGameObject.View.Height < 0)
+            {
+                OnProjectileExceededScreen?.Invoke(this, projectileGameObject);
+                _gameObjects.Remove(projectileGameObject);
+            }
+        }
+        
         if (_inputManager.isKeyPressed(VirtualKey.W) || _inputManager.isKeyPressed(VirtualKey.Up))
         {
             playerModel.PositionY -= playerModel.Speed * deltaTimeSeconds;
@@ -89,14 +117,17 @@ public class GameManager
             playerModel.PositionX += playerModel.Speed * deltaTimeSeconds;
         }
 
-        if (_inputManager.isKeyPressed(VirtualKey.Space))
+        if (_inputManager.isKeyPressed(VirtualKey.Space) && _canShoot)
         {
-            projectileModel.PositionX = playerModel.PositionX;
-            projectileModel.PositionY = playerModel.PositionY;
+            _canShoot = false;
             
+            projectileModel = new Projectile
+            {
+                PositionX = playerModel.PositionX,
+                PositionY = playerModel.PositionY,
+            };
+
             OnProjectileFired?.Invoke(this, projectileModel);
-            
-            projectileModel.PositionY -= projectileModel.Speed * deltaTimeSeconds;
         }
         
         // Update positions (player, enemies, projectiles, etc.)
