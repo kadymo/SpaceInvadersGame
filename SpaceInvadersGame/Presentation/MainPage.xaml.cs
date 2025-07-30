@@ -30,10 +30,18 @@ public sealed partial class MainPage : Page
         
         _gameManager.Start();
         _gameManager.OnProjectileFired += CreateProjectileView;
+        _gameManager.OnProjectileExceededScreen += (object sender, GameObject gameObject) =>
+        {
+            _gameObjects.Remove(gameObject);
+            GameCanvas.Children.Remove(gameObject.View);
+        };
+        
         _lastFrameTime = DateTime.Now;
         
         this.KeyDown += OnPageKeyDown;
         this.KeyUp += OnPageKeyUp;
+        
+        GameCanvas.SizeChanged += OnCanvasSizeChanged;
 
         Image playerImage = new Image
         {
@@ -71,6 +79,11 @@ public sealed partial class MainPage : Page
         _gameManager.Stop();
     }
 
+    private void OnCanvasSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        _gameManager.SetScreenBounds((float)e.NewSize.Width, (float)e.NewSize.Height);;
+    }
+
     private void OnRendering(object sender, object e)
     {
         var currentTime = DateTime.Now;
@@ -91,6 +104,12 @@ public sealed partial class MainPage : Page
             {
                 Canvas.SetLeft(go.View, enemy.PositionX);
                 Canvas.SetTop(go.View, enemy.PositionY);;
+            }
+            
+            if (go.Model is Projectile projectile)
+            {
+                Canvas.SetLeft(go.View, projectile.PositionX);
+                Canvas.SetTop(go.View, projectile.PositionY);;
             }
         }
     }
@@ -136,19 +155,23 @@ public sealed partial class MainPage : Page
         Image projectileImage = new Image
         {
             Source = new BitmapImage(new Uri("ms-appx:///Assets/Projectile.gif")),
-            Width = 50,
-            Height = 50,
+            Width = 60,
+            Height = 60,
         };
         
+        var rotation = new RotateTransform();
+        rotation.CenterX = projectileImage.Width / 2;
+        rotation.CenterY = projectileImage.Height / 2;
+        projectileImage.RenderTransform = rotation;
+        
         GameObject projectileGameObject = new GameObject(projectileImage, projectileModel);
+        projectileGameObject.Rotation = rotation;
+        projectileGameObject.Rotation.Angle = 90;
+        
         _gameObjects.Add(projectileGameObject);
         _gameManager.AddGameObject(projectileGameObject);
         
         Canvas.SetZIndex(projectileGameObject.View, 10);
         GameCanvas.Children.Add(projectileImage);
-        
-        // Draw
-        Canvas.SetLeft(projectileGameObject.View, projectileModel.PositionX);
-        Canvas.SetLeft(projectileGameObject.View, projectileModel.PositionY);
     }
 }
