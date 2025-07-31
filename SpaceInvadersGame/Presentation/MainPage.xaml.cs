@@ -30,6 +30,14 @@ public sealed partial class MainPage : Page
         
         _gameManager.Start();
         _gameManager.OnProjectileFired += CreateProjectileView;
+        _gameManager.OnProjectileHit += (object sender, CollisionEventArgs collisionData) =>
+        {
+            _gameObjects.Remove(collisionData.EnemyGameObject);
+            _gameObjects.Remove(collisionData.ProjectileGameObject);
+            
+            GameCanvas.Children.Remove(collisionData.EnemyGameObject.View);
+            GameCanvas.Children.Remove(collisionData.ProjectileGameObject.View);
+        };
         _gameManager.OnProjectileExceededScreen += (object sender, GameObject gameObject) =>
         {
             _gameObjects.Remove(gameObject);
@@ -120,7 +128,7 @@ public sealed partial class MainPage : Page
         const int rows = 4;
         const int enemyWidth = 50;
         const int enemyHeight = 50;
-        const double spacing = 10;
+        const double spacing = 25;
 
         for (int i = 0; i < rows; i++)
         {
@@ -129,12 +137,12 @@ public sealed partial class MainPage : Page
                 Image enemyImage = new Image
                 {
                     Source = new BitmapImage(new Uri("ms-appx:///Assets/Palmeiras_logo.svg.png")),
-                    Width = 50,
-                    Height = 50,
+                    Width = 45,
+                    Height = 45,
                 };
                 
                 GameObject enemyGameObject = new GameObject(enemyImage, new Enemy());
-
+                
                 if (enemyGameObject.Model is Enemy enemyModel)
                 {
                     enemyModel.PositionX = j * (enemyWidth + spacing);
@@ -155,8 +163,8 @@ public sealed partial class MainPage : Page
         Image projectileImage = new Image
         {
             Source = new BitmapImage(new Uri("ms-appx:///Assets/Projectile.gif")),
-            Width = 60,
-            Height = 60,
+            Width = 50,
+            Height = 50,
         };
         
         var rotation = new RotateTransform();
