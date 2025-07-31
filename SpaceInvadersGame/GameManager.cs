@@ -22,6 +22,7 @@ public class GameManager
     
     public event EventHandler<Projectile> OnProjectileFired;
     public event EventHandler<GameObject> OnProjectileExceededScreen;
+    public event Action OnProjectileHit;
     
     public GameManager(InputManager inputManager)
     {
@@ -47,11 +48,6 @@ public class GameManager
             _projectile = gameObject;
         }
     }
-    
-    public void HandlePlayerDied()
-    {
-        Console.WriteLine("Displaying Game Over screen.");
-    }
 
     public void Start()
     {
@@ -64,8 +60,6 @@ public class GameManager
     {
         _isGameRunning = false;
     }
-    
-    // Method called every frame]
     
 
     public void SetScreenBounds(float width, float height)
@@ -81,7 +75,6 @@ public class GameManager
         float deltaTimeSeconds = (float)deltaTime.TotalSeconds;
         
         var playerModel = _player.Model as Player;
-        // Projectile projectileModel = null;
         
         // Process input
         GameObject projectileGameObject = _gameObjects.Find(go => go.Model is Projectile);
@@ -130,9 +123,31 @@ public class GameManager
             OnProjectileFired?.Invoke(this, projectileModel);
         }
         
-        // Update positions (player, enemies, projectiles, etc.)
-        // Verify collisions
-        // Update game state (ponctuation, life, etc.)
+        VerifyCollision();
+    }
+
+    private void VerifyCollision()
+    {
+        var projectileGameObject = _gameObjects.Find(go => go.Model is Projectile);
+        var enemyGameObjects = _gameObjects.Where(go => go.Model.GetType() == typeof(Enemy)).Select(go=>go);
+    
+        if (projectileGameObject == null) return;
+        
+        foreach (var enemy in enemyGameObjects)
+        {
+            if (projectileGameObject.Model is Projectile projectileModel && enemy.Model is Enemy enemyModel)
+            {
+                var heightCollisionCondition = projectileModel.PositionY < enemyModel.PositionY + enemy.View.Height;
+              
+                var widthCollisionCondition = projectileModel.PositionX + projectileGameObject.View.Width > enemyModel.PositionX 
+                                              && projectileModel.PositionX < enemyModel.PositionX + enemy.View.Width;
+                
+                if (heightCollisionCondition && widthCollisionCondition)
+                {
+                    Console.WriteLine("COLIDIIUUUUUUUU!");
+                }
+            }
+        }
     }
     
 }
