@@ -22,7 +22,7 @@ public class GameManager
     
     public event EventHandler<Projectile> OnProjectileFired;
     public event EventHandler<GameObject> OnProjectileExceededScreen;
-    public event Action OnProjectileHit;
+    public event EventHandler<CollisionEventArgs> OnProjectileHit;
     
     public GameManager(InputManager inputManager)
     {
@@ -31,6 +31,13 @@ public class GameManager
         this.OnProjectileExceededScreen += (sender, gameObject) =>
         {
             _gameObjects.Remove(gameObject);
+            _canShoot = true;
+        };
+
+        this.OnProjectileHit += (sender, collisionData) =>
+        {
+            _gameObjects.Remove(collisionData.EnemyGameObject);
+            _gameObjects.Remove(collisionData.ProjectileGameObject);
             _canShoot = true;
         };
     }
@@ -70,13 +77,11 @@ public class GameManager
     
     public void Update(TimeSpan deltaTime)
     {
-        
         if (!_isGameRunning) return;
         float deltaTimeSeconds = (float)deltaTime.TotalSeconds;
         
         var playerModel = _player.Model as Player;
         
-        // Process input
         GameObject projectileGameObject = _gameObjects.Find(go => go.Model is Projectile);
         
         if (projectileGameObject != null && projectileGameObject.Model is Projectile projectileModel)
@@ -129,22 +134,25 @@ public class GameManager
     private void VerifyCollision()
     {
         var projectileGameObject = _gameObjects.Find(go => go.Model is Projectile);
-        var enemyGameObjects = _gameObjects.Where(go => go.Model.GetType() == typeof(Enemy)).Select(go=>go);
-    
+        
         if (projectileGameObject == null) return;
         
-        foreach (var enemy in enemyGameObjects)
+        for (int i = _gameObjects.Count - 1; i>= 0; i--)
         {
-            if (projectileGameObject.Model is Projectile projectileModel && enemy.Model is Enemy enemyModel)
+            var enemyGameObject = _gameObjects[i];
+            if (projectileGameObject.Model is Projectile projectileModel && enemyGameObject.Model is Enemy enemyModel)
             {
-                var heightCollisionCondition = projectileModel.PositionY < enemyModel.PositionY + enemy.View.Height;
+                var heightCollisionCondition = projectileModel.PositionY + 10 < enemyModel.PositionY + enemyGameObject.View.Height;
               
-                var widthCollisionCondition = projectileModel.PositionX + projectileGameObject.View.Width > enemyModel.PositionX 
-                                              && projectileModel.PositionX < enemyModel.PositionX + enemy.View.Width;
+                var widthCollisionCondition = projectileModel.PositionX + projectileGameObject.View.Width - 20 > enemyModel.PositionX 
+                                              && projectileModel.PositionX - 10 < enemyModel.PositionX + enemyGameObject.View.Width;
                 
                 if (heightCollisionCondition && widthCollisionCondition)
                 {
-                    Console.WriteLine("COLIDIIUUUUUUUU!");
+                    var collisionData = new CollisionEventArgs(enemyGameObject, projectileGameObject);
+                    OnProjectileHit?.Invoke(this, collisionData);
+                 
+
                 }
             }
         }
