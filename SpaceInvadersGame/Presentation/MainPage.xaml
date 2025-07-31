@@ -5,7 +5,10 @@
       Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
   <ScrollViewer IsTabStop="True">
       <Grid>
-          <Canvas x:Name="GameCanvas" Background="#000"/>
+          <Grid.Background>
+              <ImageBrush ImageSource="ms-appx:///Assets/SpaceBackground.jpg"></ImageBrush>
+          </Grid.Background>
+          <Canvas x:Name="GameCanvas" />
       </Grid>
   </ScrollViewer>
 </Page>
