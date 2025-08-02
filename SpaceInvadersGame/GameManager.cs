@@ -12,9 +12,7 @@ public class GameManager
     private GameObject _projectile;
     
     private readonly InputManager _inputManager;
-    
-    private float _screenWidth;
-    private float _screenHeight;
+
     private bool _canShoot = true;
     
     private DateTime _lastUpdate;
@@ -66,13 +64,6 @@ public class GameManager
     public void Stop()
     {
         _isGameRunning = false;
-    }
-    
-
-    public void SetScreenBounds(float width, float height)
-    {
-        _screenWidth = width;
-        _screenHeight = height;
     }
     
     public void Update(TimeSpan deltaTime)
@@ -151,7 +142,6 @@ public class GameManager
                 {
                     var collisionData = new CollisionEventArgs(enemyGameObject, projectileGameObject);
                     OnProjectileHit?.Invoke(this, collisionData);
-                 
 
                 }
             }
