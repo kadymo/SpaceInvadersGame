@@ -1,3 +1,6 @@
+
+using Windows.Media.Core;
+using Windows.Media.Playback;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
 using SpaceInvadersGame.Models;
@@ -8,16 +11,21 @@ public sealed partial class MainPage : Page
 {
     private readonly GameManager _gameManager;
     private readonly InputManager _inputManager;
+    // private readonly SoundManager _soundManager;
     
     private readonly List<GameObject> _gameObjects = new List<GameObject>();
     
     private DateTime _lastFrameTime;
+    
     
     public MainPage()
     {
         this.InitializeComponent();
         _inputManager = new InputManager();
         _gameManager = new GameManager(_inputManager);
+        
+        // MediaPlayerElement[] mediaPlayers = [SfxPlayer1, SfxPlayer2, SfxPlayer3];
+        // _soundManager = new SoundManager(mediaPlayers);
         
         this.Loaded += OnPageLoaded;
         this.Unloaded += OnPageUnloaded;
@@ -27,11 +35,15 @@ public sealed partial class MainPage : Page
     {
         // Start loop when the page is ready
         this.Focus(FocusState.Programmatic);
-        
+
+        Score.Text = "SCORE ";
         _gameManager.Start();
         _gameManager.OnProjectileFired += CreateProjectileView;
         _gameManager.OnProjectileHit += (object sender, CollisionEventArgs collisionData) =>
         {
+            // _soundManager.PlaySound(new Uri("ms-appx:///Assets/VaiCorinthians.mp4"));
+            Score.Text = "SCORE: " + _gameManager.Score;
+            
             _gameObjects.Remove(collisionData.EnemyGameObject);
             _gameObjects.Remove(collisionData.ProjectileGameObject);
             
@@ -48,8 +60,6 @@ public sealed partial class MainPage : Page
         
         this.KeyDown += OnPageKeyDown;
         this.KeyUp += OnPageKeyUp;
-        
-        GameCanvas.SizeChanged += OnCanvasSizeChanged;
 
         Image playerImage = new Image
         {
@@ -85,11 +95,6 @@ public sealed partial class MainPage : Page
         // Stop loop when the page is unloaded
         CompositionTarget.Rendering -= OnRendering;
         _gameManager.Stop();
-    }
-
-    private void OnCanvasSizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        _gameManager.SetScreenBounds((float)e.NewSize.Width, (float)e.NewSize.Height);;
     }
 
     private void OnRendering(object sender, object e)

@@ -14,9 +14,10 @@ public class GameManager
     private readonly InputManager _inputManager;
 
     private bool _canShoot = true;
-    
     private DateTime _lastUpdate;
     private bool _isGameRunning;
+    
+    public int Score { get; set; }
     
     public event EventHandler<Projectile> OnProjectileFired;
     public event EventHandler<GameObject> OnProjectileExceededScreen;
@@ -34,6 +35,8 @@ public class GameManager
 
         this.OnProjectileHit += (sender, collisionData) =>
         {
+            Score += 100;
+            
             _gameObjects.Remove(collisionData.EnemyGameObject);
             _gameObjects.Remove(collisionData.ProjectileGameObject);
             _canShoot = true;

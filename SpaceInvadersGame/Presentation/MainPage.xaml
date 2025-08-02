@@ -8,7 +8,20 @@
           <Grid.Background>
               <ImageBrush ImageSource="ms-appx:///Assets/SpaceBackground.jpg"></ImageBrush>
           </Grid.Background>
-          <Canvas x:Name="GameCanvas" />
+
+          <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition/>
+          </Grid.RowDefinitions>
+
+          <StackPanel>
+              <TextBlock x:Name="Score" FontWeight="Bold" FontSize="20" Foreground="red"  Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+
+          <MediaPlayerElement x:Name="SfxPlayer1" AutoPlay="False"></MediaPlayerElement>
+          <MediaPlayerElement x:Name="SfxPlayer2" AutoPlay="False"></MediaPlayerElement>
+          <MediaPlayerElement x:Name="SfxPlayer3" AutoPlay="False"></MediaPlayerElement>
+          <Canvas x:Name="GameCanvas" Margin="50" Grid.Row="1"/>
       </Grid>
   </ScrollViewer>
 </Page>
