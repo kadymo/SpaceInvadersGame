@@ -21,10 +21,11 @@ public sealed partial class MainPage : Page
     public MainPage()
     {
         this.InitializeComponent();
-        _inputManager = new InputManager();
-        _gameManager = new GameManager(_inputManager);
         
+        _inputManager = new InputManager();
         _soundManager = new SoundManager();
+        
+        _gameManager = new GameManager(_gameObjects, _inputManager, _soundManager);
         
         this.Loaded += OnPageLoaded;
         this.Unloaded += OnPageUnloaded;
@@ -35,25 +36,51 @@ public sealed partial class MainPage : Page
         // Start loop when the page is ready
         this.Focus(FocusState.Programmatic);
 
-        Score.Text = "SCORE ";
+        Score.Text = "SCORE: ";
         _gameManager.Start();
         _gameManager.OnProjectileFired += (object sender, Projectile projectileModel) =>
         { 
-            _soundManager.PlaySound("ProjectileFiredSound.wav");
             CreateProjectileView(sender, projectileModel);
-            
         };
-        _gameManager.OnProjectileHit += (object sender, CollisionEventArgs collisionData) =>
+        _gameManager.OnProjectileHit += async (object sender, CollisionEventArgs collisionData) =>
         {
-            _soundManager.PlaySound("ProjectileHitSound.wav");
             Score.Text = "SCORE: " + _gameManager.Score;
             
-            _gameObjects.Remove(collisionData.EnemyGameObject);
-            _gameObjects.Remove(collisionData.ProjectileGameObject);
+            var enemyGameObject = collisionData.EnemyGameObject;
+            var projectileGameObject = collisionData.ProjectileGameObject;
+
+            if (enemyGameObject.Model is Enemy enemyModel && projectileGameObject.Model is Projectile projectileModel)
+            {
+                enemyModel.IsActive = false;
+                projectileModel.IsActive = false;
+            }
+
+            var explosionLeft = Canvas.GetLeft(enemyGameObject.View);
+            var explosionTop = Canvas.GetTop(enemyGameObject.View);
             
-            GameCanvas.Children.Remove(collisionData.EnemyGameObject.View);
-            GameCanvas.Children.Remove(collisionData.ProjectileGameObject.View);
+            _gameObjects.Remove(enemyGameObject);
+            _gameObjects.Remove(projectileGameObject);
+            
+            GameCanvas.Children.Remove(enemyGameObject.View);
+            GameCanvas.Children.Remove(projectileGameObject.View);
+           
+            // Explosion image renderization
+            
+            Image explosionImage = new Image
+            {
+                Source = new BitmapImage(new Uri("ms-appx:///Assets/Explosion.gif")),
+                Width = 45,
+                Height = 45,
+            };
+
+            Canvas.SetLeft(explosionImage, explosionLeft);
+            Canvas.SetTop(explosionImage, explosionTop);
+    
+            GameCanvas.Children.Add(explosionImage);
+            await Task.Delay(500);
+            GameCanvas.Children.Remove(explosionImage);
         };
+        
         _gameManager.OnProjectileExceededScreen += (object sender, GameObject gameObject) =>
         {
             _gameObjects.Remove(gameObject);

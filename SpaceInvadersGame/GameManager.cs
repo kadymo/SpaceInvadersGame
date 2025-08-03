@@ -7,11 +7,12 @@ namespace SpaceInvadersGame;
 
 public class GameManager
 {
-    private List<GameObject> _gameObjects = new List<GameObject>();
+    private List<GameObject> _gameObjects;
     private GameObject _player;
     private GameObject _projectile;
     
     private readonly InputManager _inputManager;
+    private readonly SoundManager _soundManager;
 
     private bool _canShoot = true;
     private DateTime _lastUpdate;
@@ -23,23 +24,27 @@ public class GameManager
     public event EventHandler<GameObject> OnProjectileExceededScreen;
     public event EventHandler<CollisionEventArgs> OnProjectileHit;
     
-    public GameManager(InputManager inputManager)
+    public GameManager(List<GameObject> gameObjects, InputManager inputManager, SoundManager soundManager)
     {
+        _gameObjects = gameObjects;
         _inputManager = inputManager;
+        _soundManager = soundManager;
+
+        this.OnProjectileFired += (sender, projectileModel) =>
+        {
+            _soundManager.PlaySound("ProjectileFiredSound.wav");
+        };
 
         this.OnProjectileExceededScreen += (sender, gameObject) =>
         {
-            _gameObjects.Remove(gameObject);
             _canShoot = true;
         };
 
         this.OnProjectileHit += (sender, collisionData) =>
         {
             Score += 100;
-            
-            _gameObjects.Remove(collisionData.EnemyGameObject);
-            _gameObjects.Remove(collisionData.ProjectileGameObject);
             _canShoot = true;
+            _soundManager.PlaySound("ProjectileHitSound.wav");
         };
     }
 
@@ -143,9 +148,9 @@ public class GameManager
                 
                 if (heightCollisionCondition && widthCollisionCondition)
                 {
-                    var collisionData = new CollisionEventArgs(enemyGameObject, projectileGameObject);
+                    var collisionData = new CollisionEventArgs(projectileGameObject, enemyGameObject);
                     OnProjectileHit?.Invoke(this, collisionData);
-
+                    break;
                 }
             }
         }
