@@ -17,7 +17,6 @@ public sealed partial class MainPage : Page
     
     private DateTime _lastFrameTime;
     
-    
     public MainPage()
     {
         this.InitializeComponent();
@@ -49,12 +48,6 @@ public sealed partial class MainPage : Page
             var enemyGameObject = collisionData.EnemyGameObject;
             var projectileGameObject = collisionData.ProjectileGameObject;
 
-            if (enemyGameObject.Model is Enemy enemyModel && projectileGameObject.Model is Projectile projectileModel)
-            {
-                enemyModel.IsActive = false;
-                projectileModel.IsActive = false;
-            }
-
             var explosionLeft = Canvas.GetLeft(enemyGameObject.View);
             var explosionTop = Canvas.GetTop(enemyGameObject.View);
             
@@ -65,7 +58,6 @@ public sealed partial class MainPage : Page
             GameCanvas.Children.Remove(projectileGameObject.View);
            
             // Explosion image renderization
-            
             Image explosionImage = new Image
             {
                 Source = new BitmapImage(new Uri("ms-appx:///Assets/Explosion.gif")),
