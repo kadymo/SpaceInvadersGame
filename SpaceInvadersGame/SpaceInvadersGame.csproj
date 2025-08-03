@@ -31,10 +31,5 @@
       <IsDefaultItem>true</IsDefaultItem>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-<!--    <PackageReference Include="LibVLCSharp" />-->
-<!--    <PackageReference Include="Uno.WinUI.MediaPlayer.Skia.Gtk" />-->
-<!--    <PackageReference Include="VideoLAN.LibVLC.Windows" />-->
-  </ItemGroup>
 
 </Project>
