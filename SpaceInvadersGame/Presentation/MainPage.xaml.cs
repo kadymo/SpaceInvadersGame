@@ -11,7 +11,7 @@ public sealed partial class MainPage : Page
 {
     private readonly GameManager _gameManager;
     private readonly InputManager _inputManager;
-    // private readonly SoundManager _soundManager;
+    private readonly SoundManager _soundManager;
     
     private readonly List<GameObject> _gameObjects = new List<GameObject>();
     
@@ -24,8 +24,7 @@ public sealed partial class MainPage : Page
         _inputManager = new InputManager();
         _gameManager = new GameManager(_inputManager);
         
-        // MediaPlayerElement[] mediaPlayers = [SfxPlayer1, SfxPlayer2, SfxPlayer3];
-        // _soundManager = new SoundManager(mediaPlayers);
+        _soundManager = new SoundManager();
         
         this.Loaded += OnPageLoaded;
         this.Unloaded += OnPageUnloaded;
@@ -38,10 +37,15 @@ public sealed partial class MainPage : Page
 
         Score.Text = "SCORE ";
         _gameManager.Start();
-        _gameManager.OnProjectileFired += CreateProjectileView;
+        _gameManager.OnProjectileFired += (object sender, Projectile projectileModel) =>
+        { 
+            _soundManager.PlaySound("ProjectileFiredSound.wav");
+            CreateProjectileView(sender, projectileModel);
+            
+        };
         _gameManager.OnProjectileHit += (object sender, CollisionEventArgs collisionData) =>
         {
-            // _soundManager.PlaySound(new Uri("ms-appx:///Assets/VaiCorinthians.mp4"));
+            _soundManager.PlaySound("ProjectileHitSound.wav");
             Score.Text = "SCORE: " + _gameManager.Score;
             
             _gameObjects.Remove(collisionData.EnemyGameObject);
@@ -186,5 +190,6 @@ public sealed partial class MainPage : Page
         
         Canvas.SetZIndex(projectileGameObject.View, 10);
         GameCanvas.Children.Add(projectileImage);
+        
     }
 }
