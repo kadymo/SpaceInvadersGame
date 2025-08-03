@@ -7,7 +7,7 @@ public class SoundManager
 {
     public void PlaySound(string fileName)
     {
-        string path = Path.Combine(AppContext.BaseDirectory, "Assets", fileName);
+        string path = Path.Combine(AppContext.BaseDirectory, "Assets/Sounds", fileName);
         PlaySound(path, IntPtr.Zero, SoundFlags.SND_FILE | SoundFlags.SND_ASINC);
     }
     
