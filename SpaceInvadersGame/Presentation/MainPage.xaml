@@ -7,7 +7,7 @@
   <ScrollViewer IsTabStop="True">
       <Grid>
           <Grid.Background>
-              <ImageBrush ImageSource="ms-appx:///Assets/SpaceBackground.jpg"></ImageBrush>
+              <ImageBrush ImageSource="ms-appx:///Assets/Images/SpaceBackground.jpg"></ImageBrush>
           </Grid.Background>
 
           <Grid.RowDefinitions>
