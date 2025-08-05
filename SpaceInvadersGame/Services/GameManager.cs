@@ -23,6 +23,7 @@ public class GameManager
     public event EventHandler<Projectile> OnProjectileFired;
     public event EventHandler<GameObject> OnProjectileExceededScreen;
     public event EventHandler<CollisionEventArgs> OnProjectileHit;
+    public event EventHandler<CollisionEventArgs> OnObstacleHit;
     
     public GameManager(List<GameObject> gameObjects, InputManager inputManager, SoundManager soundManager)
     {
@@ -66,7 +67,6 @@ public class GameManager
     {
         _isGameRunning = true;
         _lastUpdate = DateTime.Now;
-        // lógica inicial 
     }
 
     public void Stop()
@@ -128,6 +128,7 @@ public class GameManager
         }
         
         VerifyCollision();
+        VerifyObstacleCollision();
     }
 
     private void VerifyCollision()
@@ -156,4 +157,29 @@ public class GameManager
         }
     }
     
+    private void VerifyObstacleCollision()
+    {
+        var projectileGameObject = _gameObjects.Find(go => go.Model is Projectile);
+        
+        if (projectileGameObject == null) return;
+        
+        for (int i = _gameObjects.Count - 1; i>= 0; i--)
+        {
+            var obstacleGameObject = _gameObjects[i];
+            if (projectileGameObject.Model is Projectile projectileModel && obstacleGameObject.Model is Obstacle obstacleModel)
+            {
+                var heightCollisionCondition = projectileModel.PositionY + 10 < obstacleModel.PositionY + obstacleGameObject.View.Height;
+              
+                var widthCollisionCondition = projectileModel.PositionX + projectileGameObject.View.Width - 20 > obstacleModel.PositionX 
+                                              && projectileModel.PositionX - 10 < obstacleModel.PositionX + obstacleGameObject.View.Width;
+                
+                if (heightCollisionCondition && widthCollisionCondition)
+                {
+                    var collisionData = new CollisionEventArgs(projectileGameObject, obstacleGameObject);
+                    OnObstacleHit?.Invoke(this, collisionData);
+                    break;
+                }
+            }
+        }
+    }
 }
