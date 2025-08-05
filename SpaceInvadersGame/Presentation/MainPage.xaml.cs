@@ -35,76 +35,15 @@ public sealed partial class MainPage : Page
     
     private void OnPageLoaded(object sender, RoutedEventArgs e)
     {
-        // Start loop when the page is ready
         this.Focus(FocusState.Programmatic);
 
         Score.Text = "SCORE: ";
         _gameManager.Start();
         
-        _gameManager.ProjectileFired += (object sender, Projectile projectileModel) =>
-        { 
-            CreateProjectileView(sender, projectileModel);
-        };
-        
-        _gameManager.ProjectileHit += async (object sender, CollisionEventArgs collisionData) =>
-        {
-            Score.Text = "SCORE: " + _gameManager.Score;
-            
-            var enemyGameObject = collisionData.TargetGameObject;
-            var projectileGameObject = collisionData.ProjectileGameObject;
-
-            var explosionLeft = Canvas.GetLeft(enemyGameObject.View);
-            var explosionTop = Canvas.GetTop(enemyGameObject.View);
-            
-            _gameObjects.Remove(enemyGameObject);
-            _gameObjects.Remove(projectileGameObject);
-            
-            GameCanvas.Children.Remove(enemyGameObject.View);
-            GameCanvas.Children.Remove(projectileGameObject.View);
-           
-            // Explosion image renderization
-            Image explosionImage = new Image
-            {
-                Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Explosion.gif")),
-                Width = 45,
-                Height = 45,
-            };
-
-            Canvas.SetLeft(explosionImage, explosionLeft);
-            Canvas.SetTop(explosionImage, explosionTop);
-    
-            GameCanvas.Children.Add(explosionImage);
-            await Task.Delay(500);
-            GameCanvas.Children.Remove(explosionImage);
-        };
-        
-        _gameManager.ProjectileExceededScreen += (object sender, GameObject gameObject) =>
-        {
-            _gameObjects.Remove(gameObject);
-            GameCanvas.Children.Remove(gameObject.View);
-        };
-
-        _gameManager.ObstacleHit += async (object sender, CollisionEventArgs collisionData) =>
-        {
-            var obstacleGameObject = collisionData.TargetGameObject;
-            var projectileGameObject = collisionData.ProjectileGameObject;
-
-            if (obstacleGameObject.Model is Obstacle obstacleModel)
-            {
-                obstacleModel.Health -= 5;
-                
-                if (obstacleModel.Health <= 0)
-                {
-                    _gameObjects.Remove(obstacleGameObject);
-                    GameCanvas.Children.Remove(obstacleGameObject.View);       
-                }
-                
-                _gameObjects.Remove(projectileGameObject); 
-                GameCanvas.Children.Remove(projectileGameObject.View);        
-                
-                obstacleGameObject.View.Opacity = (obstacleModel.Health / 100);
-            }
-        };
+        _gameManager.ProjectileFired += OnProjectileFired;
+        _gameManager.ProjectileHit += OnProjectileHit;
+        _gameManager.ProjectileExceededScreen += OnProjectileExeededScreen;
+        _gameManager.ObstacleHit += OnObstacleHit;
         
         _lastFrameTime = DateTime.Now;
         
@@ -117,25 +56,14 @@ public sealed partial class MainPage : Page
         
         CompositionTarget.Rendering += OnRendering;
     }
-
-    private void OnPageKeyDown(object sender, KeyRoutedEventArgs e)
-    {
-        _inputManager.KeyDown(e.Key);
-    }
-    
-    private void OnPageKeyUp(object sender, KeyRoutedEventArgs e)
-    {
-        _inputManager.KeyUp(e.Key);
-    }
     
     private void OnPageUnloaded(object sender, RoutedEventArgs e)
     {
-        // Stop loop when the page is unloaded
         CompositionTarget.Rendering -= OnRendering;
         _gameManager.Stop();
     }
 
-    private void OnRendering(object sender, object e)
+    private void OnRendering(object? sender, object e)
     {
         var currentTime = DateTime.Now;
         var deltaTime = currentTime - _lastFrameTime;
@@ -168,6 +96,71 @@ public sealed partial class MainPage : Page
                 Canvas.SetLeft(go.View, obstacle.PositionX);
                 Canvas.SetTop(go.View, obstacle.PositionY);;
             }
+        }
+    }
+    
+    private void OnPageKeyDown(object sender, KeyRoutedEventArgs e) => _inputManager.KeyDown(e.Key);
+    
+    private void OnPageKeyUp(object sender, KeyRoutedEventArgs e) => _inputManager.KeyUp(e.Key);
+
+    private void OnProjectileFired(object? sender, Projectile projectileModel) => CreateProjectileView(projectileModel);
+    
+    private async void OnProjectileHit(object? sender, CollisionEventArgs collisionData)
+    {
+        Score.Text = "SCORE: " + _gameManager.Score;
+            
+        var enemyGameObject = collisionData.TargetGameObject;
+        var projectileGameObject = collisionData.ProjectileGameObject;
+
+        var explosionLeft = Canvas.GetLeft(enemyGameObject.View);
+        var explosionTop = Canvas.GetTop(enemyGameObject.View);
+            
+        _gameObjects.Remove(enemyGameObject);
+        _gameObjects.Remove(projectileGameObject);
+            
+        GameCanvas.Children.Remove(enemyGameObject.View);
+        GameCanvas.Children.Remove(projectileGameObject.View);
+           
+        Image explosionImage = new Image
+        {
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Explosion.gif")),
+            Width = 45,
+            Height = 45,
+        };
+
+        Canvas.SetLeft(explosionImage, explosionLeft);
+        Canvas.SetTop(explosionImage, explosionTop);
+    
+        GameCanvas.Children.Add(explosionImage);
+        await Task.Delay(500);
+        GameCanvas.Children.Remove(explosionImage);
+    }
+
+    private void OnProjectileExeededScreen(object? sender, GameObject gameObject)
+    {
+        _gameObjects.Remove(gameObject);
+        GameCanvas.Children.Remove(gameObject.View);
+    }
+    
+    private void OnObstacleHit(object? sender, CollisionEventArgs collisionData)
+    {
+        var obstacleGameObject = collisionData.TargetGameObject;
+        var projectileGameObject = collisionData.ProjectileGameObject;
+
+        if (obstacleGameObject.Model is Obstacle obstacleModel)
+        {
+            obstacleModel.Health -= 5;
+                
+            if (obstacleModel.Health <= 0)
+            {
+                _gameObjects.Remove(obstacleGameObject);
+                GameCanvas.Children.Remove(obstacleGameObject.View);       
+            }
+                
+            _gameObjects.Remove(projectileGameObject); 
+            GameCanvas.Children.Remove(projectileGameObject.View);        
+                
+            obstacleGameObject.View.Opacity = (obstacleModel.Health / 100);
         }
     }
     
@@ -258,7 +251,7 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private void CreateProjectileView(object sender, Projectile projectileModel)
+    private void CreateProjectileView(Projectile projectileModel)
     {
         Image projectileImage = new Image
         {
