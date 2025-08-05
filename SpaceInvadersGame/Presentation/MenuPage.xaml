@@ -5,17 +5,17 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    >
     <ScrollView IsTabStop="True">
-        <Grid >
+        <Grid>
             <Grid.Background>
                 <ImageBrush ImageSource="ms-appx:///Assets/Images/SpaceBackground.jpg"/>
             </Grid.Background>
 
             <StackPanel HorizontalAlignment="Center" Spacing="100" Margin="100">
                 <Image Source="/Assets/Images/GameLogo.png" Width="300"/>
-                <Button Click="StartGameButton_Click" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" FontWeight="Bold" FontSize="20" Padding="16 8" >Start Game</Button>
+                <Button Click="StartGameButton_Click" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8" >Start Game</Button>
             </StackPanel>
         </Grid>
     </ScrollView>
