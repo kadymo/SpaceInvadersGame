@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Extensions.Logging;
+using SpaceInvadersGame.Presentation;
 using Uno.Resizetizer;
 
 namespace SpaceInvadersGame;
@@ -31,7 +32,7 @@ public partial class App : Application
 
         if (rootFrame.Content == null)
         {
-            rootFrame.Navigate(typeof(MainPage), args.Arguments);
+            rootFrame.Navigate(typeof(MenuPage), args.Arguments);
         }
         MainWindow.Activate();
     }
