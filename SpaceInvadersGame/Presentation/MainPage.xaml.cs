@@ -1,8 +1,11 @@
 
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
+using SkiaSharp;
+using SkiaSharp.Views.Windows;
 using SpaceInvadersGame.Models;
 
 namespace SpaceInvadersGame;
@@ -37,15 +40,17 @@ public sealed partial class MainPage : Page
 
         Score.Text = "SCORE: ";
         _gameManager.Start();
+        
         _gameManager.OnProjectileFired += (object sender, Projectile projectileModel) =>
         { 
             CreateProjectileView(sender, projectileModel);
         };
+        
         _gameManager.OnProjectileHit += async (object sender, CollisionEventArgs collisionData) =>
         {
             Score.Text = "SCORE: " + _gameManager.Score;
             
-            var enemyGameObject = collisionData.EnemyGameObject;
+            var enemyGameObject = collisionData.TargetGameObject;
             var projectileGameObject = collisionData.ProjectileGameObject;
 
             var explosionLeft = Canvas.GetLeft(enemyGameObject.View);
@@ -86,7 +91,7 @@ public sealed partial class MainPage : Page
 
             if (obstacleGameObject.Model is Obstacle obstacleModel)
             {
-                obstacleModel.Health -= 25;
+                obstacleModel.Health -= 5;
                 
                 if (obstacleModel.Health <= 0)
                 {
@@ -105,22 +110,10 @@ public sealed partial class MainPage : Page
         
         this.KeyDown += OnPageKeyDown;
         this.KeyUp += OnPageKeyUp;
-
-        Image playerImage = new Image
-        {
-            Source = new BitmapImage(new Uri("ms-appx:///Assets/Corinthians_simbolo.png")),
-            Width = 50,
-            Height = 50,
-        };
-
-        GameObject player = new GameObject(playerImage, new Player());
-        _gameObjects.Add(player);
-        _gameManager.AddGameObject(player);
         
-        Canvas.SetZIndex(player.View, 10);
-        GameCanvas.Children.Add(playerImage);
-        
-        CreateEnemiesGrid();
+        CreatePlayerView();
+        CreateEnemiesView();
+        CreateObstaclesView();
         
         CompositionTarget.Rendering += OnRendering;
     }
@@ -169,6 +162,12 @@ public sealed partial class MainPage : Page
                 Canvas.SetLeft(go.View, projectile.PositionX);
                 Canvas.SetTop(go.View, projectile.PositionY);;
             }
+            
+            if (go.Model is Obstacle obstacle)
+            {
+                Canvas.SetLeft(go.View, obstacle.PositionX);
+                Canvas.SetTop(go.View, obstacle.PositionY);;
+            }
         }
     }
     
@@ -203,7 +202,7 @@ public sealed partial class MainPage : Page
             {
                 Image enemyImage = new Image
                 {
-                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Palmeiras_logo.svg.png")),
+                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Elayne.png")),
                     Width = 45,
                     Height = 45,
                 };
@@ -264,8 +263,8 @@ public sealed partial class MainPage : Page
         Image projectileImage = new Image
         {
             Source = new BitmapImage(new Uri("ms-appx:///Assets/Projectile.gif")),
-            Width = 50,
-            Height = 50,
+            Width = 60,
+            Height = 60,
         };
         
         var rotation = new RotateTransform();
