@@ -2,6 +2,7 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:SpaceInvadersGame"
+      xmlns:windows="clr-namespace:SkiaSharp.Views.Windows;assembly=SkiaSharp.Views.Windows"
       Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
   <ScrollViewer IsTabStop="True">
       <Grid>
@@ -18,9 +19,6 @@
               <TextBlock x:Name="Score" FontWeight="Bold" FontSize="20" Foreground="red"  Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" />
           </StackPanel>
 
-          <MediaPlayerElement x:Name="SfxPlayer1" AutoPlay="False"></MediaPlayerElement>
-          <MediaPlayerElement x:Name="SfxPlayer2" AutoPlay="False"></MediaPlayerElement>
-          <MediaPlayerElement x:Name="SfxPlayer3" AutoPlay="False"></MediaPlayerElement>
           <Canvas x:Name="GameCanvas" Margin="50" Grid.Row="1"/>
       </Grid>
   </ScrollViewer>
