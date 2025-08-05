@@ -20,10 +20,10 @@ public class GameManager
     
     public int Score { get; set; }
     
-    public event EventHandler<Projectile> OnProjectileFired;
-    public event EventHandler<GameObject> OnProjectileExceededScreen;
-    public event EventHandler<CollisionEventArgs> OnProjectileHit;
-    public event EventHandler<CollisionEventArgs> OnObstacleHit;
+    public event EventHandler<Projectile> ProjectileFired;
+    public event EventHandler<GameObject> ProjectileExceededScreen;
+    public event EventHandler<CollisionEventArgs> ProjectileHit;
+    public event EventHandler<CollisionEventArgs> ObstacleHit;
     
     public GameManager(List<GameObject> gameObjects, InputManager inputManager, SoundManager soundManager)
     {
@@ -31,24 +31,24 @@ public class GameManager
         _inputManager = inputManager;
         _soundManager = soundManager;
 
-        this.OnProjectileFired += (sender, projectileModel) =>
+        this.ProjectileFired += (sender, projectileModel) =>
         {
             _soundManager.PlaySound("ProjectileFiredSound.wav");
         };
 
-        this.OnProjectileExceededScreen += (sender, gameObject) =>
+        this.ProjectileExceededScreen += (sender, gameObject) =>
         {
             _canShoot = true;
         };
 
-        this.OnProjectileHit += (sender, collisionData) =>
+        this.ProjectileHit += (sender, collisionData) =>
         {
             Score += 100;
             _canShoot = true;
             _soundManager.PlaySound("ProjectileHitSound.wav");
         };
         
-        this.OnObstacleHit += (sender, collisionData) =>
+        this.ObstacleHit += (sender, collisionData) =>
         {
             _canShoot = true;
             _soundManager.PlaySound("ObstacleHitSound.wav");
@@ -95,7 +95,7 @@ public class GameManager
             
             if (projectileModel.PositionY + projectileGameObject.View.Height < 0)
             {
-                OnProjectileExceededScreen?.Invoke(this, projectileGameObject);
+                ProjectileExceededScreen?.Invoke(this, projectileGameObject);
                 _gameObjects.Remove(projectileGameObject);
             }
         }
@@ -130,7 +130,7 @@ public class GameManager
                 PositionY = playerModel.PositionY,
             };
 
-            OnProjectileFired?.Invoke(this, projectileModel);
+            ProjectileFired?.Invoke(this, projectileModel);
         }
         
         VerifyObstacleCollision();
@@ -156,7 +156,7 @@ public class GameManager
                 if (heightCollisionCondition && widthCollisionCondition)
                 {
                     var collisionData = new CollisionEventArgs(projectileGameObject, enemyGameObject);
-                    OnProjectileHit?.Invoke(this, collisionData);
+                    ProjectileHit?.Invoke(this, collisionData);
                     break;
                 }
             }
@@ -182,7 +182,7 @@ public class GameManager
                 if (heightCollisionCondition && widthCollisionCondition)
                 {
                     var collisionData = new CollisionEventArgs(projectileGameObject, obstacleGameObject);
-                    OnObstacleHit?.Invoke(this, collisionData);
+                    ObstacleHit?.Invoke(this, collisionData);
                     break;
                 }
             }

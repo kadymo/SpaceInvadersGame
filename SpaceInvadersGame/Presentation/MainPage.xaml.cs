@@ -41,12 +41,12 @@ public sealed partial class MainPage : Page
         Score.Text = "SCORE: ";
         _gameManager.Start();
         
-        _gameManager.OnProjectileFired += (object sender, Projectile projectileModel) =>
+        _gameManager.ProjectileFired += (object sender, Projectile projectileModel) =>
         { 
             CreateProjectileView(sender, projectileModel);
         };
         
-        _gameManager.OnProjectileHit += async (object sender, CollisionEventArgs collisionData) =>
+        _gameManager.ProjectileHit += async (object sender, CollisionEventArgs collisionData) =>
         {
             Score.Text = "SCORE: " + _gameManager.Score;
             
@@ -65,7 +65,7 @@ public sealed partial class MainPage : Page
             // Explosion image renderization
             Image explosionImage = new Image
             {
-                Source = new BitmapImage(new Uri("ms-appx:///Assets/Explosion.gif")),
+                Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Explosion.gif")),
                 Width = 45,
                 Height = 45,
             };
@@ -78,13 +78,13 @@ public sealed partial class MainPage : Page
             GameCanvas.Children.Remove(explosionImage);
         };
         
-        _gameManager.OnProjectileExceededScreen += (object sender, GameObject gameObject) =>
+        _gameManager.ProjectileExceededScreen += (object sender, GameObject gameObject) =>
         {
             _gameObjects.Remove(gameObject);
             GameCanvas.Children.Remove(gameObject.View);
         };
 
-        _gameManager.OnObstacleHit += async (object sender, CollisionEventArgs collisionData) =>
+        _gameManager.ObstacleHit += async (object sender, CollisionEventArgs collisionData) =>
         {
             var obstacleGameObject = collisionData.TargetGameObject;
             var projectileGameObject = collisionData.ProjectileGameObject;
@@ -175,7 +175,7 @@ public sealed partial class MainPage : Page
     {
         Image playerImage = new Image
         {
-            Source = new BitmapImage(new Uri("ms-appx:///Assets/Corinthians_simbolo.png")),
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Corinthians.png")),
             Width = 50,
             Height = 50,
         };
@@ -202,7 +202,7 @@ public sealed partial class MainPage : Page
             {
                 Image enemyImage = new Image
                 {
-                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Elayne.png")),
+                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Palmeiras.svg.png")),
                     Width = 45,
                     Height = 45,
                 };
@@ -228,8 +228,8 @@ public sealed partial class MainPage : Page
     {
         const int columns = 3;
         const int rows = 1;
-        const int obstacleWidth = 200;
-        const int obstacleHeight = 200;
+        const int obstacleWidth = 150;
+        const int obstacleHeight = 45;
         const double spacing = 150;
         
         for (int i = 0; i < rows; i++)
@@ -238,7 +238,7 @@ public sealed partial class MainPage : Page
             {
                 Image obstacleImage = new Image
                 {
-                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Obstacle.png")),
+                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Obstacle.png")),
                     Width = 150,
                     Height = 45,
                 };
@@ -262,7 +262,7 @@ public sealed partial class MainPage : Page
     {
         Image projectileImage = new Image
         {
-            Source = new BitmapImage(new Uri("ms-appx:///Assets/Projectile.gif")),
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Projectile.gif")),
             Width = 60,
             Height = 60,
         };
