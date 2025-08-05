@@ -203,6 +203,40 @@ public sealed partial class MainPage : Page
         }
     }
 
+    private void CreateObstaclesView()
+    {
+        const int columns = 3;
+        const int rows = 1;
+        const int obstacleWidth = 200;
+        const int obstacleHeight = 200;
+        const double spacing = 150;
+        
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                Image obstacleImage = new Image
+                {
+                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Obstacle.png")),
+                    Width = 150,
+                    Height = 45,
+                };
+                
+                GameObject obstacleGameObject = new GameObject(obstacleImage, new Obstacle());
+                
+                if (obstacleGameObject.Model is Obstacle obstacleModel)
+                {
+                    obstacleModel.PositionX = j * (obstacleWidth + spacing);
+                    obstacleModel.PositionY = i * (obstacleHeight + spacing) + 340;
+                }
+                _gameObjects.Add(obstacleGameObject);
+                
+                Canvas.SetZIndex(obstacleGameObject.View, 10);
+                GameCanvas.Children.Add(obstacleImage);
+            }
+        }
+    }
+
     private void CreateProjectileView(object sender, Projectile projectileModel)
     {
         Image projectileImage = new Image
