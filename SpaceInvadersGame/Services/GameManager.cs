@@ -47,6 +47,12 @@ public class GameManager
             _canShoot = true;
             _soundManager.PlaySound("ProjectileHitSound.wav");
         };
+        
+        this.OnObstacleHit += (sender, collisionData) =>
+        {
+            _canShoot = true;
+            _soundManager.PlaySound("ObstacleHitSound.wav");
+        };
     }
 
     public void AddGameObject(GameObject gameObject)
@@ -127,8 +133,8 @@ public class GameManager
             OnProjectileFired?.Invoke(this, projectileModel);
         }
         
-        VerifyCollision();
         VerifyObstacleCollision();
+        VerifyCollision();
     }
 
     private void VerifyCollision()
