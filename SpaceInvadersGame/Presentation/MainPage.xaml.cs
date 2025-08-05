@@ -78,6 +78,28 @@ public sealed partial class MainPage : Page
             _gameObjects.Remove(gameObject);
             GameCanvas.Children.Remove(gameObject.View);
         };
+
+        _gameManager.OnObstacleHit += async (object sender, CollisionEventArgs collisionData) =>
+        {
+            var obstacleGameObject = collisionData.TargetGameObject;
+            var projectileGameObject = collisionData.ProjectileGameObject;
+
+            if (obstacleGameObject.Model is Obstacle obstacleModel)
+            {
+                obstacleModel.Health -= 25;
+                
+                if (obstacleModel.Health <= 0)
+                {
+                    _gameObjects.Remove(obstacleGameObject);
+                    GameCanvas.Children.Remove(obstacleGameObject.View);       
+                }
+                
+                _gameObjects.Remove(projectileGameObject); 
+                GameCanvas.Children.Remove(projectileGameObject.View);        
+                
+                obstacleGameObject.View.Opacity = (obstacleModel.Health / 100);
+            }
+        };
         
         _lastFrameTime = DateTime.Now;
         
