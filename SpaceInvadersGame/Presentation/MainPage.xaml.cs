@@ -149,8 +149,25 @@ public sealed partial class MainPage : Page
             }
         }
     }
+    
+    private void CreatePlayerView()
+    {
+        Image playerImage = new Image
+        {
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Corinthians_simbolo.png")),
+            Width = 50,
+            Height = 50,
+        };
 
-    private void CreateEnemiesGrid()
+        GameObject player = new GameObject(playerImage, new Player());
+        _gameObjects.Add(player);
+        _gameManager.AddGameObject(player);
+        
+        Canvas.SetZIndex(player.View, 10);
+        GameCanvas.Children.Add(playerImage);
+    }
+
+    private void CreateEnemiesView()
     {
         const int columns = 6;
         const int rows = 4;
