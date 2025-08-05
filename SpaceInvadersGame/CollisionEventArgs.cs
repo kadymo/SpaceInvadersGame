@@ -5,11 +5,11 @@ namespace SpaceInvadersGame;
 public class CollisionEventArgs
 {
     public GameObject ProjectileGameObject { get; set; }
-    public GameObject EnemyGameObject { get; set; }
+    public GameObject TargetGameObject { get; set; }
 
-    public CollisionEventArgs(GameObject projectileGameObject, GameObject enemyGameObject)
+    public CollisionEventArgs(GameObject projectileGameObject, GameObject targetGameObject)
     {
         ProjectileGameObject = projectileGameObject;
-        EnemyGameObject = enemyGameObject;
+        TargetGameObject = targetGameObject;
     }
 }
