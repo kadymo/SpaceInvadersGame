@@ -4,9 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="clr-namespace:SpaceInvadersGame.ViewModels"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     >
+    <Page.DataContext>
+        <viewModels:MenuViewModel x:Name="ViewModel" />
+    </Page.DataContext>
+
     <ScrollView IsTabStop="True">
         <Grid>
             <Grid.Background>
@@ -15,7 +20,10 @@
 
             <StackPanel HorizontalAlignment="Center" Spacing="100" Margin="100">
                 <Image Source="/Assets/Images/GameLogo.png" Width="300"/>
-                <Button Click="StartGameButton_Click" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8" >Start Game</Button>
+                <StackPanel Spacing="10">
+                    <Button Click="StartGameButton_Click" IsEnabled="{x:Bind ViewModel.IsStartButtonEnabled, Mode=OneWay}" Width="180" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8" >Start Game</Button>
+                    <TextBox x:Name="UsernameTextbox" Width="180" Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="username" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8"/>
+                </StackPanel>
             </StackPanel>
         </Grid>
     </ScrollView>
