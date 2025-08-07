@@ -12,6 +12,7 @@ namespace SpaceInvadersGame;
 
 public sealed partial class MainPage : Page
 {
+    // Managers
     private readonly GameManager _gameManager;
     private readonly InputManager _inputManager;
     private readonly SoundManager _soundManager;
@@ -26,18 +27,21 @@ public sealed partial class MainPage : Page
         
         _inputManager = new InputManager();
         _soundManager = new SoundManager();
-        
         _gameManager = new GameManager(_gameObjects, _inputManager, _soundManager);
         
         this.Loaded += OnPageLoaded;
         this.Unloaded += OnPageUnloaded;
     }
     
+    // Page Event Handlers
+    
     private void OnPageLoaded(object sender, RoutedEventArgs e)
     {
         this.Focus(FocusState.Programmatic);
+        this.KeyDown += OnPageKeyDown;
+        this.KeyUp += OnPageKeyUp;
 
-        Score.Text = "SCORE: ";
+        Score.Text = "SCORE: 0";
         _gameManager.Start();
         
         _gameManager.ProjectileFired += OnProjectileFired;
@@ -46,9 +50,6 @@ public sealed partial class MainPage : Page
         _gameManager.ObstacleHit += OnObstacleHit;
         
         _lastFrameTime = DateTime.Now;
-        
-        this.KeyDown += OnPageKeyDown;
-        this.KeyUp += OnPageKeyUp;
         
         CreatePlayerView();
         CreateEnemiesView();
@@ -61,6 +62,17 @@ public sealed partial class MainPage : Page
     {
         CompositionTarget.Rendering -= OnRendering;
         _gameManager.Stop();
+    }
+    
+    // Navigation Handlers
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        if (e.Parameter is TextBox parameter)
+        {
+            Username.Text = parameter.Text;;
+        }
     }
 
     private void OnRendering(object? sender, object e)
@@ -99,10 +111,14 @@ public sealed partial class MainPage : Page
         }
     }
     
+    // Keyboard Event Handlers
+    
     private void OnPageKeyDown(object sender, KeyRoutedEventArgs e) => _inputManager.KeyDown(e.Key);
     
     private void OnPageKeyUp(object sender, KeyRoutedEventArgs e) => _inputManager.KeyUp(e.Key);
 
+    // Game Event Handlers
+    
     private void OnProjectileFired(object? sender, Projectile projectileModel) => CreateProjectileView(projectileModel);
     
     private async void OnProjectileHit(object? sender, CollisionEventArgs collisionData)
@@ -180,6 +196,8 @@ public sealed partial class MainPage : Page
         Canvas.SetZIndex(player.View, 10);
         GameCanvas.Children.Add(playerImage);
     }
+    
+    // Game Objects Creation
 
     private void CreateEnemiesView()
     {

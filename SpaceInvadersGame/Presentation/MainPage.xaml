@@ -16,9 +16,15 @@
               <RowDefinition/>
           </Grid.RowDefinitions>
 
-          <StackPanel>
-              <TextBlock FontSize="30" Margin="40,20,0,0" x:Name="Score" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" />
-          </StackPanel>
+          <Grid ColumnSpacing="10">
+              <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition />
+              </Grid.ColumnDefinitions>
+
+              <TextBlock Grid.Column="0" FontSize="30" Margin="40,20,0,0" x:Name="Score" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBlock Grid.Column="1" FontSize="30" Margin="40,20,0,0" x:Name="Username" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" />
+          </Grid>
 
           <Canvas x:Name="GameCanvas" Margin="50" Grid.Row="1"/>
       </Grid>
