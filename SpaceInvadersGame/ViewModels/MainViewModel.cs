@@ -43,7 +43,6 @@ public partial class MainViewModel : ObservableObject
     public event EventHandler<ObjectEventArgs> ObstacleRemoved;
     public event EventHandler<ObjectEventArgs> ExplosionEffectCreated;
     public event EventHandler<ObjectEventArgs> ExplosionEffectRemoved;
-    public event EventHandler<SwarmMovedEventArgs> SwarmMoved;
 
     public void Start()
     {

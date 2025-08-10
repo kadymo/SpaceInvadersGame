@@ -24,10 +24,7 @@ public class GameManager
     public event EventHandler<GameObject> ProjectileExceededScreen;
     public event EventHandler<CollisionEventArgs> ProjectileHit;
     public event EventHandler<CollisionEventArgs> ObstacleHit;
-    public event EventHandler<SwarmMovedEventArgs> SwarmMoved;
 
-    private double _swarmPositionX;
-    private double _swarmPositionY;
     private double _swarmDirection = 1.0f;
     
     public GameManager(List<GameObject> gameObjects, InputManager inputManager, SoundManager soundManager)
