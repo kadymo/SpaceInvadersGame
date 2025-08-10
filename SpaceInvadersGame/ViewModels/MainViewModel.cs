@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Media.Imaging;
 using SpaceInvadersGame.Models;
+using SpaceInvadersGame.Models.Enums;
 
 namespace SpaceInvadersGame.ViewModels;
 
@@ -179,25 +180,40 @@ public partial class MainViewModel : ObservableObject
 
     private void CreateEnemy()
     {
-        const int columns = 6;
-        const int rows = 4;
-        const int enemyWidth = 50;
-        const int enemyHeight = 50;
-        const double spacing = 25;
+        const int columns = 11;
+        const int rows = 5;
+        const int enemyWidth = 40;
+        const int enemyHeight = 40;
+        const double spacing = 15;
 
+        Uri GetEnemyImageUri(EnemyType enemyType)
+        {
+            switch (enemyType)
+            {
+                case EnemyType.LOW: return new Uri("ms-appx:///Assets/Images/EnemyLow.png");
+                case EnemyType.MEDIUM: return new Uri("ms-appx:///Assets/Images/EnemyMedium.png");
+                case EnemyType.HIGH: return new Uri("ms-appx:///Assets/Images/EnemyHigh.png");
+                default: return new Uri("ms-appx:///Assets/Images/EnemyLow.png");
+            }
+        }
+        
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
             {
+                Enemy enemy = new Enemy();
+                if (i == 0) enemy.Type = EnemyType.HIGH;
+                else if (i == 1 || i == 2) enemy.Type = EnemyType.MEDIUM;
+                else enemy.Type = EnemyType.LOW;
+                
                 Image enemyImage = new Image
                 {
-                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Palmeiras.svg.png")),
-                    Width = 45,
-                    Height = 45,
+                    Source = new BitmapImage(GetEnemyImageUri(enemy.Type)),
+                    Width = 40,
+                    Height = 40,
                 };
                 
                 GameObject enemyGameObject = new GameObject(enemyImage, new Enemy());
-                
                 if (enemyGameObject.Model is Enemy enemyModel)
                 {
                     enemyModel.PositionX = j * (enemyWidth + spacing);
