@@ -24,7 +24,7 @@ public sealed partial class MenuPage : Page
 
     private void StartGameButton_Click(object sender, RoutedEventArgs e)
     {
-        this.Frame.Navigate(typeof(MainPage));
+        this.Frame.Navigate(typeof(MainPage), UsernameTextbox);
     }
 }
 
