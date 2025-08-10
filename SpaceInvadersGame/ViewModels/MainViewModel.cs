@@ -213,7 +213,7 @@ public partial class MainViewModel : ObservableObject
                     Height = 40,
                 };
                 
-                GameObject enemyGameObject = new GameObject(enemyImage, new Enemy());
+                GameObject enemyGameObject = new GameObject(enemyImage, enemy);
                 if (enemyGameObject.Model is Enemy enemyModel)
                 {
                     enemyModel.PositionX = j * (enemyWidth + spacing);

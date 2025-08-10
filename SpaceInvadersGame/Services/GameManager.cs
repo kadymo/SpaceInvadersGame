@@ -3,6 +3,7 @@ using Windows.Foundation;
 using Windows.System;
 using Microsoft.UI.Xaml.Media.Imaging;
 using SpaceInvadersGame.Models;
+using SpaceInvadersGame.Models.Enums;
 
 namespace SpaceInvadersGame;
 
@@ -45,7 +46,22 @@ public class GameManager
 
         this.ProjectileHit += (sender, collisionData) =>
         {
-            Score += 100;
+            if (collisionData.TargetGameObject.Model is Enemy enemyModel)
+            {
+                switch (enemyModel.Type)
+                {
+                    case EnemyType.LOW:
+                        Score += 10;
+                        break;
+                    case EnemyType.MEDIUM:
+                        Score += 20;
+                        break;
+                    case EnemyType.HIGH:
+                        Score += 40;
+                        break;
+                }
+            }
+            
             _canShoot = true;
             _soundManager.PlaySound("ProjectileHitSound.wav");
         };
