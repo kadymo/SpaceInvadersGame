@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Windows.Foundation;
 using Windows.System;
 using Microsoft.UI.Xaml.Media.Imaging;
 using SpaceInvadersGame.Models;
@@ -9,7 +10,6 @@ public class GameManager
 {
     private List<GameObject> _gameObjects;
     private GameObject _player;
-    private GameObject _projectile;
     
     private readonly InputManager _inputManager;
     private readonly SoundManager _soundManager;
@@ -24,6 +24,11 @@ public class GameManager
     public event EventHandler<GameObject> ProjectileExceededScreen;
     public event EventHandler<CollisionEventArgs> ProjectileHit;
     public event EventHandler<CollisionEventArgs> ObstacleHit;
+    public event EventHandler<SwarmMovedEventArgs> SwarmMoved;
+
+    private double _swarmPositionX;
+    private double _swarmPositionY;
+    private double _swarmDirection = 1.0f;
     
     public GameManager(List<GameObject> gameObjects, InputManager inputManager, SoundManager soundManager)
     {
@@ -62,11 +67,11 @@ public class GameManager
         {
             _player = gameObject;
         }
-
-        if (gameObject.Model is Projectile projectileModel)
-        {
-            _projectile = gameObject;
-        }
+    }
+    
+    public void RemoveGameObject(GameObject gameObject)
+    {
+        _gameObjects.Remove(gameObject);
     }
 
     public void Start()
@@ -80,7 +85,7 @@ public class GameManager
         _isGameRunning = false;
     }
     
-    public void Update(TimeSpan deltaTime)
+    public void Update(TimeSpan deltaTime, Rect bounds)
     {
         if (!_isGameRunning) return;
         float deltaTimeSeconds = (float)deltaTime.TotalSeconds;
@@ -98,6 +103,47 @@ public class GameManager
                 ProjectileExceededScreen?.Invoke(this, projectileGameObject);
                 _gameObjects.Remove(projectileGameObject);
             }
+        }
+
+        var enemies = _gameObjects.Where(x => x.Model is Enemy).Select(x => x).ToList();
+
+        bool hitEdge = false;
+        foreach (var enemy in enemies)
+        {
+            if (enemy.Model is Enemy enemyModel)
+            {
+                enemyModel.PositionX += enemyModel.Speed * _swarmDirection * deltaTimeSeconds;
+            }
+        }
+        
+        double maxX = enemies.Max(enemy => ((Enemy)enemy.Model).PositionX + enemy.View.Width);
+        double minX = enemies.Min(enemy => ((Enemy)enemy.Model).PositionX);
+
+        if (maxX > bounds.Right)
+        {
+            double correction = maxX - bounds.Right;
+            foreach (var enemy in enemies)
+            {
+                if (enemy.Model is Enemy enemyModel)
+                {
+                    enemyModel.PositionX -= correction;
+                }
+            }
+            _swarmDirection = -1.0f;
+            hitEdge = true;
+        }
+        else if (minX < bounds.Left)
+        {
+            double correction = bounds.Left - minX;
+            foreach (var enemy in enemies)
+            {
+                if (enemy.Model is Enemy enemyModel)
+                {
+                    enemyModel.PositionX += correction;
+                }
+            }
+            _swarmDirection = 1.0f;
+            hitEdge = true;
         }
         
         if (_inputManager.isKeyPressed(VirtualKey.W) || _inputManager.isKeyPressed(VirtualKey.Up))
@@ -152,7 +198,7 @@ public class GameManager
               
                 var widthCollisionCondition = projectileModel.PositionX + projectileGameObject.View.Width - 20 > enemyModel.PositionX 
                                               && projectileModel.PositionX - 10 < enemyModel.PositionX + enemyGameObject.View.Width;
-                
+
                 if (heightCollisionCondition && widthCollisionCondition)
                 {
                     var collisionData = new CollisionEventArgs(projectileGameObject, enemyGameObject);
