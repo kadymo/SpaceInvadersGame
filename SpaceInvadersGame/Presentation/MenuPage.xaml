@@ -21,8 +21,8 @@
             <StackPanel HorizontalAlignment="Center" Spacing="100" Margin="100">
                 <Image Source="/Assets/Images/GameLogo.png" Width="300"/>
                 <StackPanel Spacing="10">
-                    <Button Click="StartGameButton_Click" IsEnabled="{x:Bind ViewModel.IsStartButtonEnabled, Mode=OneWay}" Width="180" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8" >Start Game</Button>
                     <TextBox x:Name="UsernameTextbox" Width="180" Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="username" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8"/>
+                    <Button Click="StartGameButton_Click" IsEnabled="{x:Bind ViewModel.IsStartButtonEnabled, Mode=OneWay}" Width="180" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8" >Start Game</Button>
                 </StackPanel>
             </StackPanel>
         </Grid>
