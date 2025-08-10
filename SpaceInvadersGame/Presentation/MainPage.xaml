@@ -3,9 +3,15 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:SpaceInvadersGame"
       xmlns:windows="clr-namespace:SkiaSharp.Views.Windows;assembly=SkiaSharp.Views.Windows"
+      xmlns:viewModels="clr-namespace:SpaceInvadersGame.ViewModels"
       Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
       FontFamily="{StaticResource GameFont}">
-  <ScrollViewer IsTabStop="True">
+
+    <Page.DataContext>
+        <viewModels:MainViewModel x:Name="ViewModel" />
+    </Page.DataContext>
+
+    <ScrollViewer IsTabStop="True">
       <Grid>
           <Grid.Background>
               <ImageBrush ImageSource="ms-appx:///Assets/Images/SpaceBackground.jpg"></ImageBrush>
@@ -26,7 +32,9 @@
               <TextBlock Grid.Column="1" FontSize="30" Margin="40,20,0,0" x:Name="Username" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" />
           </Grid>
 
-          <Canvas x:Name="GameCanvas" Margin="50" Grid.Row="1"/>
+          <Canvas x:Name="GameCanvas" Margin="50" Grid.Row="1">
+              <!-- <Canvas x:Name="EnemiesCanvas"/> -->
+          </Canvas>
       </Grid>
   </ScrollViewer>
 </Page>
