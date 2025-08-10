@@ -5,7 +5,7 @@ public class Enemy
     public double PositionX { get; set; } = 0;
     public double PositionY { get; set; }
     public double Health { get; set; } = 100;
-    public double Speed { get; set; } = 300;
+    public double Speed { get; set; } = 35;
 
     public event Action OnEnemyDied;
     
