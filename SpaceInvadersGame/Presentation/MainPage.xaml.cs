@@ -1,36 +1,31 @@
-
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Media.Core;
-using Windows.Media.Playback;
+using Windows.Foundation;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media.Imaging;
-using SkiaSharp;
-using SkiaSharp.Views.Windows;
-using SpaceInvadersGame.Models;
+using SpaceInvadersGame.ViewModels;
 
 namespace SpaceInvadersGame;
 
 public sealed partial class MainPage : Page
 {
-    // Managers
-    private readonly GameManager _gameManager;
-    private readonly InputManager _inputManager;
-    private readonly SoundManager _soundManager;
-    
-    private readonly List<GameObject> _gameObjects = new List<GameObject>();
-    
     private DateTime _lastFrameTime;
     
     public MainPage()
     {
         this.InitializeComponent();
-        
-        _inputManager = new InputManager();
-        _soundManager = new SoundManager();
-        _gameManager = new GameManager(_gameObjects, _inputManager, _soundManager);
+        ViewModel = new MainViewModel();
+        this.DataContext = ViewModel;
         
         this.Loaded += OnPageLoaded;
         this.Unloaded += OnPageUnloaded;
+
+        ViewModel.PlayerCreated += OnPlayerCreated;
+        ViewModel.EnemyCreated += OnEnemyCreated;
+        ViewModel.EnemyRemoved += OnEnemyRemoved;
+        ViewModel.ProjectileCreated += OnProjectileCreated;
+        ViewModel.ProjectileRemoved += OnProjectileRemoved;
+        ViewModel.ObstacleCreated += OnObstacleCreated;
+        ViewModel.ObstacleRemoved += OnObstacleRemoved;
+        ViewModel.ExplosionEffectCreated += OnExplosionEffectCreated;
+        ViewModel.ExplosionEffectRemoved += OnExplosionEffectRemoved;
     }
     
     // Page Event Handlers
@@ -42,18 +37,10 @@ public sealed partial class MainPage : Page
         this.KeyUp += OnPageKeyUp;
 
         Score.Text = "SCORE: 0";
-        _gameManager.Start();
         
-        _gameManager.ProjectileFired += OnProjectileFired;
-        _gameManager.ProjectileHit += OnProjectileHit;
-        _gameManager.ProjectileExceededScreen += OnProjectileExeededScreen;
-        _gameManager.ObstacleHit += OnObstacleHit;
+        ViewModel.Start();
         
         _lastFrameTime = DateTime.Now;
-        
-        CreatePlayerView();
-        CreateEnemiesView();
-        CreateObstaclesView();
         
         CompositionTarget.Rendering += OnRendering;
     }
@@ -61,7 +48,7 @@ public sealed partial class MainPage : Page
     private void OnPageUnloaded(object sender, RoutedEventArgs e)
     {
         CompositionTarget.Rendering -= OnRendering;
-        _gameManager.Stop();
+        ViewModel.Stop();
     }
     
     // Navigation Handlers
@@ -71,7 +58,7 @@ public sealed partial class MainPage : Page
         base.OnNavigatedTo(e);
         if (e.Parameter is TextBox parameter)
         {
-            Username.Text = parameter.Text;;
+            Username.Text = parameter.Text;
         }
     }
 
@@ -81,217 +68,60 @@ public sealed partial class MainPage : Page
         var deltaTime = currentTime - _lastFrameTime;
         _lastFrameTime = currentTime;
         
-        _gameManager.Update(deltaTime);
-
-        foreach (var go in _gameObjects)
-        {
-            if (go.Model is Player player)
-            {
-                Canvas.SetLeft(go.View, player.PositionX);
-                Canvas.SetTop(go.View, player.PositionY);
-            }
-
-            if (go.Model is Enemy enemy)
-            {
-                Canvas.SetLeft(go.View, enemy.PositionX);
-                Canvas.SetTop(go.View, enemy.PositionY);;
-            }
-            
-            if (go.Model is Projectile projectile)
-            {
-                Canvas.SetLeft(go.View, projectile.PositionX);
-                Canvas.SetTop(go.View, projectile.PositionY);;
-            }
-            
-            if (go.Model is Obstacle obstacle)
-            {
-                Canvas.SetLeft(go.View, obstacle.PositionX);
-                Canvas.SetTop(go.View, obstacle.PositionY);;
-            }
-        }
+        var bounds = new Rect(0, 0, (float)GameCanvas.ActualWidth, (float)GameCanvas.ActualHeight);
+        ViewModel.Update(deltaTime, bounds);
     }
     
     // Keyboard Event Handlers
     
-    private void OnPageKeyDown(object sender, KeyRoutedEventArgs e) => _inputManager.KeyDown(e.Key);
-    
-    private void OnPageKeyUp(object sender, KeyRoutedEventArgs e) => _inputManager.KeyUp(e.Key);
+    private void OnPageKeyDown(object sender, KeyRoutedEventArgs e) => ViewModel.InputManager.KeyDown(e.Key);
+    private void OnPageKeyUp(object sender, KeyRoutedEventArgs e) => ViewModel.InputManager.KeyUp(e.Key);
 
-    // Game Event Handlers
     
-    private void OnProjectileFired(object? sender, Projectile projectileModel) => CreateProjectileView(projectileModel);
-    
-    private async void OnProjectileHit(object? sender, CollisionEventArgs collisionData)
+    private void OnPlayerCreated(object  sender, ObjectEventArgs data)
     {
-        Score.Text = "SCORE: " + _gameManager.Score;
-            
-        var enemyGameObject = collisionData.TargetGameObject;
-        var projectileGameObject = collisionData.ProjectileGameObject;
-
-        var explosionLeft = Canvas.GetLeft(enemyGameObject.View);
-        var explosionTop = Canvas.GetTop(enemyGameObject.View);
-            
-        _gameObjects.Remove(enemyGameObject);
-        _gameObjects.Remove(projectileGameObject);
-            
-        GameCanvas.Children.Remove(enemyGameObject.View);
-        GameCanvas.Children.Remove(projectileGameObject.View);
-           
-        Image explosionImage = new Image
-        {
-            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Explosion.gif")),
-            Width = 45,
-            Height = 45,
-        };
-
-        Canvas.SetLeft(explosionImage, explosionLeft);
-        Canvas.SetTop(explosionImage, explosionTop);
-    
-        GameCanvas.Children.Add(explosionImage);
-        await Task.Delay(500);
-        GameCanvas.Children.Remove(explosionImage);
+        // Canvas.SetZIndex(data.GameObject.View, 10);
+        GameCanvas.Children.Add(data.ImageElement);
     }
 
-    private void OnProjectileExeededScreen(object? sender, GameObject gameObject)
+    private void OnEnemyCreated(object  sender, ObjectEventArgs data)
     {
-        _gameObjects.Remove(gameObject);
-        GameCanvas.Children.Remove(gameObject.View);
+        GameCanvas.Children.Add(data.ImageElement);
     }
     
-    private void OnObstacleHit(object? sender, CollisionEventArgs collisionData)
-    {
-        var obstacleGameObject = collisionData.TargetGameObject;
-        var projectileGameObject = collisionData.ProjectileGameObject;
+    private void OnEnemyRemoved(object  sender, ObjectEventArgs data)
+    { 
+        GameCanvas.Children.Remove(data.GameObject.View);
+    }
 
-        if (obstacleGameObject.Model is Obstacle obstacleModel)
-        {
-            obstacleModel.Health -= 5;
-                
-            if (obstacleModel.Health <= 0)
-            {
-                _gameObjects.Remove(obstacleGameObject);
-                GameCanvas.Children.Remove(obstacleGameObject.View);       
-            }
-                
-            _gameObjects.Remove(projectileGameObject); 
-            GameCanvas.Children.Remove(projectileGameObject.View);        
-                
-            obstacleGameObject.View.Opacity = (obstacleModel.Health / 100);
-        }
+    private void OnProjectileCreated(object  sender, ObjectEventArgs data)
+    {
+        // Canvas.SetZIndex(data.GameObject.View, 10);
+        GameCanvas.Children.Add(data.ImageElement);
+    }
+
+    private void OnProjectileRemoved(object sender, ObjectEventArgs data)
+    {
+        GameCanvas.Children.Remove(data.GameObject.View);
     }
     
-    private void CreatePlayerView()
+    private void OnObstacleCreated(object sender, ObjectEventArgs data)
     {
-        Image playerImage = new Image
-        {
-            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Corinthians.png")),
-            Width = 50,
-            Height = 50,
-        };
-
-        GameObject player = new GameObject(playerImage, new Player());
-        _gameObjects.Add(player);
-        _gameManager.AddGameObject(player);
-        
-        Canvas.SetZIndex(player.View, 10);
-        GameCanvas.Children.Add(playerImage);
+        GameCanvas.Children.Add(data.ImageElement);
     }
     
-    // Game Objects Creation
-
-    private void CreateEnemiesView()
+    private void OnObstacleRemoved(object sender, ObjectEventArgs data)
     {
-        const int columns = 6;
-        const int rows = 4;
-        const int enemyWidth = 50;
-        const int enemyHeight = 50;
-        const double spacing = 25;
-
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < columns; j++)
-            {
-                Image enemyImage = new Image
-                {
-                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Palmeiras.svg.png")),
-                    Width = 45,
-                    Height = 45,
-                };
-                
-                GameObject enemyGameObject = new GameObject(enemyImage, new Enemy());
-                
-                if (enemyGameObject.Model is Enemy enemyModel)
-                {
-                    enemyModel.PositionX = j * (enemyWidth + spacing);
-                    enemyModel.PositionY = i * (enemyHeight + spacing);
-                }
-                
-                _gameObjects.Add(enemyGameObject); 
-                _gameManager.AddGameObject(enemyGameObject);
-                
-                Canvas.SetZIndex(enemyGameObject.View, 10);
-                GameCanvas.Children.Add(enemyImage);
-            }
-        }
+        GameCanvas.Children.Remove(data.GameObject.View);
     }
 
-    private void CreateObstaclesView()
+    private void OnExplosionEffectCreated(object sender, ObjectEventArgs data)
     {
-        const int columns = 3;
-        const int rows = 1;
-        const int obstacleWidth = 150;
-        const int obstacleHeight = 45;
-        const double spacing = 150;
-        
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < columns; j++)
-            {
-                Image obstacleImage = new Image
-                {
-                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Obstacle.png")),
-                    Width = 150,
-                    Height = 45,
-                };
-                
-                GameObject obstacleGameObject = new GameObject(obstacleImage, new Obstacle());
-                
-                if (obstacleGameObject.Model is Obstacle obstacleModel)
-                {
-                    obstacleModel.PositionX = j * (obstacleWidth + spacing);
-                    obstacleModel.PositionY = i * (obstacleHeight + spacing) + 340;
-                }
-                _gameObjects.Add(obstacleGameObject);
-                
-                Canvas.SetZIndex(obstacleGameObject.View, 10);
-                GameCanvas.Children.Add(obstacleImage);
-            }
-        }
+        GameCanvas.Children.Add(data.ImageElement);
     }
-
-    private void CreateProjectileView(Projectile projectileModel)
+    
+    private void OnExplosionEffectRemoved(object sender, ObjectEventArgs data)
     {
-        Image projectileImage = new Image
-        {
-            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Projectile.gif")),
-            Width = 60,
-            Height = 60,
-        };
-        
-        var rotation = new RotateTransform();
-        rotation.CenterX = projectileImage.Width / 2;
-        rotation.CenterY = projectileImage.Height / 2;
-        projectileImage.RenderTransform = rotation;
-        
-        GameObject projectileGameObject = new GameObject(projectileImage, projectileModel);
-        projectileGameObject.Rotation = rotation;
-        projectileGameObject.Rotation.Angle = 90;
-        
-        _gameObjects.Add(projectileGameObject);
-        _gameManager.AddGameObject(projectileGameObject);
-        
-        Canvas.SetZIndex(projectileGameObject.View, 10);
-        GameCanvas.Children.Add(projectileImage);
-        
+        GameCanvas.Children.Remove(data.ImageElement);
     }
 }
