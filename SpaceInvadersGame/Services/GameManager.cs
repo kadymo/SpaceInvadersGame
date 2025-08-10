@@ -101,47 +101,8 @@ public class GameManager
                 _gameObjects.Remove(projectileGameObject);
             }
         }
-
-        var enemies = _gameObjects.Where(x => x.Model is Enemy).Select(x => x).ToList();
-
-        bool hitEdge = false;
-        foreach (var enemy in enemies)
-        {
-            if (enemy.Model is Enemy enemyModel)
-            {
-                enemyModel.PositionX += enemyModel.Speed * _swarmDirection * deltaTimeSeconds;
-            }
-        }
         
-        double maxX = enemies.Max(enemy => ((Enemy)enemy.Model).PositionX + enemy.View.Width);
-        double minX = enemies.Min(enemy => ((Enemy)enemy.Model).PositionX);
-
-        if (maxX > bounds.Right)
-        {
-            double correction = maxX - bounds.Right;
-            foreach (var enemy in enemies)
-            {
-                if (enemy.Model is Enemy enemyModel)
-                {
-                    enemyModel.PositionX -= correction;
-                }
-            }
-            _swarmDirection = -1.0f;
-            hitEdge = true;
-        }
-        else if (minX < bounds.Left)
-        {
-            double correction = bounds.Left - minX;
-            foreach (var enemy in enemies)
-            {
-                if (enemy.Model is Enemy enemyModel)
-                {
-                    enemyModel.PositionX += correction;
-                }
-            }
-            _swarmDirection = 1.0f;
-            hitEdge = true;
-        }
+        MovementEnemies(deltaTimeSeconds, bounds);
         
         if (_inputManager.isKeyPressed(VirtualKey.W) || _inputManager.isKeyPressed(VirtualKey.Up))
         {
@@ -227,6 +188,60 @@ public class GameManager
                     var collisionData = new CollisionEventArgs(projectileGameObject, obstacleGameObject);
                     ObstacleHit?.Invoke(this, collisionData);
                     break;
+                }
+            }
+        }
+    }
+
+    private void MovementEnemies(float deltaTimeSeconds, Rect bounds)
+    {
+        var enemies = _gameObjects.Where(x => x.Model is Enemy).Select(x => x).ToList();
+        bool hitEdge = false;
+        foreach (var enemy in enemies)
+        {
+            if (enemy.Model is Enemy enemyModel)
+            {
+                enemyModel.PositionX += enemyModel.Speed * _swarmDirection * deltaTimeSeconds;
+            }
+        }
+        
+        double maxX = enemies.Max(enemy => ((Enemy)enemy.Model).PositionX + enemy.View.Width);
+        double minX = enemies.Min(enemy => ((Enemy)enemy.Model).PositionX);
+
+        if (maxX > bounds.Right)
+        {
+            double correction = maxX - bounds.Right;
+            foreach (var enemy in enemies)
+            {
+                if (enemy.Model is Enemy enemyModel)
+                {
+                    enemyModel.PositionX -= correction;
+                }
+            }
+            _swarmDirection = -1.0f;
+            hitEdge = true;
+        }
+        else if (minX < bounds.Left)
+        {
+            double correction = bounds.Left - minX;
+            foreach (var enemy in enemies)
+            {
+                if (enemy.Model is Enemy enemyModel)
+                {
+                    enemyModel.PositionX += correction;
+                }
+            }
+            _swarmDirection = 1.0f;
+            hitEdge = true;
+        } 
+        
+        if (hitEdge)
+        {
+            foreach (var enemy in enemies)
+            {
+                if (enemy.Model is Enemy enemyModel)
+                {
+                    enemyModel.PositionY += 1;
                 }
             }
         }
