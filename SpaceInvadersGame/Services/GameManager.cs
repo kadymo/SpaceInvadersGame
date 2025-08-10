@@ -91,51 +91,11 @@ public class GameManager
         
         GameObject projectileGameObject = _gameObjects.Find(go => go.Model is Projectile);
         
-        if (projectileGameObject != null && projectileGameObject.Model is Projectile projectileModel)
-        {
-            projectileModel.PositionY -= projectileModel.Speed * deltaTimeSeconds;
-            
-            if (projectileModel.PositionY + projectileGameObject.View.Height < 0)
-            {
-                ProjectileExceededScreen?.Invoke(this, projectileGameObject);
-                _gameObjects.Remove(projectileGameObject);
-            }
-        }
-        
+        MovementProjectile(projectileGameObject, deltaTimeSeconds);
         MovementEnemies(deltaTimeSeconds, bounds);
+        MovementPlayer(playerModel, deltaTimeSeconds);
         
-        if (_inputManager.isKeyPressed(VirtualKey.W) || _inputManager.isKeyPressed(VirtualKey.Up))
-        {
-            playerModel.PositionY -= playerModel.Speed * deltaTimeSeconds;
-        }
-
-        if (_inputManager.isKeyPressed(VirtualKey.S) || _inputManager.isKeyPressed(VirtualKey.Down))
-        {
-            playerModel.PositionY += playerModel.Speed * deltaTimeSeconds;
-        }
-        
-        if (_inputManager.isKeyPressed(VirtualKey.A) || _inputManager.isKeyPressed(VirtualKey.Left)) 
-        {
-            playerModel.PositionX -= playerModel.Speed * deltaTimeSeconds;
-        }
-
-        if (_inputManager.isKeyPressed(VirtualKey.D) || _inputManager.isKeyPressed(VirtualKey.Right))
-        {
-            playerModel.PositionX += playerModel.Speed * deltaTimeSeconds;
-        }
-
-        if (_inputManager.isKeyPressed(VirtualKey.Space) && _canShoot)
-        {
-            _canShoot = false;
-            
-            projectileModel = new Projectile
-            {
-                PositionX = playerModel.PositionX,
-                PositionY = playerModel.PositionY,
-            };
-
-            ProjectileFired?.Invoke(this, projectileModel);
-        }
+        FireProjectile(projectileGameObject, playerModel, deltaTimeSeconds);
         
         VerifyObstacleCollision();
         VerifyCollision();
@@ -193,6 +153,29 @@ public class GameManager
         }
     }
 
+    private void MovementPlayer(Player playerModel, float deltaTimeSeconds)
+    {
+        if (_inputManager.isKeyPressed(VirtualKey.W) || _inputManager.isKeyPressed(VirtualKey.Up))
+        {
+            playerModel.PositionY -= playerModel.Speed * deltaTimeSeconds;
+        }
+
+        if (_inputManager.isKeyPressed(VirtualKey.S) || _inputManager.isKeyPressed(VirtualKey.Down))
+        {
+            playerModel.PositionY += playerModel.Speed * deltaTimeSeconds;
+        }
+        
+        if (_inputManager.isKeyPressed(VirtualKey.A) || _inputManager.isKeyPressed(VirtualKey.Left)) 
+        {
+            playerModel.PositionX -= playerModel.Speed * deltaTimeSeconds;
+        }
+
+        if (_inputManager.isKeyPressed(VirtualKey.D) || _inputManager.isKeyPressed(VirtualKey.Right))
+        {
+            playerModel.PositionX += playerModel.Speed * deltaTimeSeconds;
+        }   
+    }
+
     private void MovementEnemies(float deltaTimeSeconds, Rect bounds)
     {
         var enemies = _gameObjects.Where(x => x.Model is Enemy).Select(x => x).ToList();
@@ -244,6 +227,37 @@ public class GameManager
                     enemyModel.PositionY += 1;
                 }
             }
+        }
+    }
+
+    private void MovementProjectile(GameObject projectileGameObject, float deltaTimeSeconds)
+    {
+        
+        if (projectileGameObject != null && projectileGameObject.Model is Projectile projectileModel)
+        {
+            projectileModel.PositionY -= projectileModel.Speed * deltaTimeSeconds;
+            
+            if (projectileModel.PositionY + projectileGameObject.View.Height < 0)
+            {
+                ProjectileExceededScreen?.Invoke(this, projectileGameObject);
+                _gameObjects.Remove(projectileGameObject);
+            }
+        }
+    }
+
+    private void FireProjectile(GameObject projectileGameObject, Player playerModel, float deltaTimeSeconds)
+    {
+        if (_inputManager.isKeyPressed(VirtualKey.Space) && _canShoot)
+        {
+            _canShoot = false;
+            
+            var projectileModel = new Projectile
+            {
+                PositionX = playerModel.PositionX,
+                PositionY = playerModel.PositionY,
+            };
+
+            ProjectileFired?.Invoke(this, projectileModel);
         }
     }
 }
