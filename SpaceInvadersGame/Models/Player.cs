@@ -8,6 +8,8 @@ public class Player
     public double Health { get; set; } = 100;
     public double Speed { get; set; } = 200;
     
+    public int Lifes { get; set; } = 3;
+    
     public event Action OnPlayerDied;
 
     public void TakeDamage(int amount)
