@@ -1,4 +1,6 @@
-﻿namespace SpaceInvadersGame.Models;
+﻿using SpaceInvadersGame.Models.Enums;
+
+namespace SpaceInvadersGame.Models;
 
 public class Projectile
 {
@@ -6,4 +8,5 @@ public class Projectile
     public double PositionY { get; set; }
     public double Health { get; set; } = 100;
     public double Speed { get; set; } = 300;
+    public ProjectileFirer Firer { get; set; }
 }
