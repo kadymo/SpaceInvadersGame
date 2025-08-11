@@ -31,11 +31,13 @@ public partial class MainViewModel : ObservableObject
         
         _gameManager.ProjectileFired += OnProjectileFired;
         _gameManager.ProjectileHit += OnProjectileHit;
+        _gameManager.ProjectileHitPlayer += OnProjectileHitPlayer;
         _gameManager.ProjectileExceededScreen += OnProjectileExeededScreen;
         _gameManager.ObstacleHit += OnObstacleHit;
     }
 
     public event EventHandler<ObjectEventArgs> PlayerCreated;
+    public event EventHandler<ObjectEventArgs> PlayerRemoved;
     public event EventHandler<ObjectEventArgs> EnemyCreated;
     public event EventHandler<ObjectEventArgs> EnemyRemoved;
     public event EventHandler<ObjectEventArgs> ProjectileCreated;
@@ -80,7 +82,7 @@ public partial class MainViewModel : ObservableObject
             if (go.Model is Projectile projectile)
             {
                 Canvas.SetLeft(go.View, projectile.PositionX);
-                Canvas.SetTop(go.View, projectile.PositionY);;
+                Canvas.SetTop(go.View, projectile.PositionY);
             }
             
             if (go.Model is Obstacle obstacle)
@@ -99,19 +101,19 @@ public partial class MainViewModel : ObservableObject
     {
         Score = "SCORE: " + _gameManager.Score;
         
-        var enemyGameObject = collisionData.TargetGameObject;
+        var targetGameObject = collisionData.TargetGameObject;
         var projectileGameObject = collisionData.ProjectileGameObject;
 
-        var explosionLeft = Canvas.GetLeft(enemyGameObject.View);
-        var explosionTop = Canvas.GetTop(enemyGameObject.View);
+        var explosionLeft = Canvas.GetLeft(targetGameObject.View);
+        var explosionTop = Canvas.GetTop(targetGameObject.View);
             
-        _gameObjects.Remove(enemyGameObject);
-        _gameManager.RemoveGameObject(enemyGameObject);
+        _gameObjects.Remove(targetGameObject);
+        _gameManager.RemoveGameObject(targetGameObject);
         
         _gameObjects.Remove(projectileGameObject);
         _gameManager.RemoveGameObject(projectileGameObject);
-            
-        EnemyRemoved?.Invoke(this, new ObjectEventArgs(enemyGameObject, enemyGameObject.View));
+        
+        EnemyRemoved?.Invoke(this, new ObjectEventArgs(targetGameObject, targetGameObject.View));
         ProjectileRemoved?.Invoke(this, new ObjectEventArgs(projectileGameObject));
            
         Image explosionImage = new Image
@@ -124,6 +126,48 @@ public partial class MainViewModel : ObservableObject
         Canvas.SetLeft(explosionImage, explosionLeft);
         Canvas.SetTop(explosionImage, explosionTop);
 
+        ExplosionEffectCreated(this, new ObjectEventArgs(explosionImage));
+        await Task.Delay(500);
+        ExplosionEffectRemoved(this, new ObjectEventArgs(explosionImage));
+    }
+
+    private async void OnProjectileHitPlayer(object? sender, CollisionEventArgs collisionData)
+    {
+        var targetGameObject = collisionData.TargetGameObject;
+        var projectileGameObject = collisionData.ProjectileGameObject;
+
+        _gameObjects.Remove(projectileGameObject);
+        _gameManager.RemoveGameObject(projectileGameObject);
+        ProjectileRemoved?.Invoke(this, new ObjectEventArgs(projectileGameObject));
+        
+        Console.WriteLine("Antes: " + _gameManager.Score);
+        if (targetGameObject.Model is Player playerModel)
+        {
+            playerModel.Lifes -= 1; 
+            Console.WriteLine("Depois: " + _gameManager.Score);
+            
+            if (playerModel.Lifes <= 0)
+            { 
+                _gameObjects.Remove(targetGameObject);
+                _gameManager.RemoveGameObject(targetGameObject);
+                
+                PlayerRemoved?.Invoke(this, new ObjectEventArgs(targetGameObject, targetGameObject.View));
+            }
+        }
+
+        
+        var explosionLeft = Canvas.GetLeft(targetGameObject.View);
+        var explosionTop = Canvas.GetTop(targetGameObject.View);
+        
+        Image explosionImage = new Image
+        {
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Explosion.gif")),
+            Width = 45,
+            Height = 45,
+        };
+
+        Canvas.SetLeft(explosionImage, explosionLeft);
+        Canvas.SetTop(explosionImage, explosionTop);
 
         ExplosionEffectCreated(this, new ObjectEventArgs(explosionImage));
         await Task.Delay(500);

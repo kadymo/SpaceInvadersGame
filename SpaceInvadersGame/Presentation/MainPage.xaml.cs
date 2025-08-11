@@ -18,6 +18,7 @@ public sealed partial class MainPage : Page
         this.Unloaded += OnPageUnloaded;
 
         ViewModel.PlayerCreated += OnPlayerCreated;
+        ViewModel.PlayerRemoved += OnPlayerRemoved;
         ViewModel.EnemyCreated += OnEnemyCreated;
         ViewModel.EnemyRemoved += OnEnemyRemoved;
         ViewModel.ProjectileCreated += OnProjectileCreated;
@@ -80,8 +81,12 @@ public sealed partial class MainPage : Page
     
     private void OnPlayerCreated(object  sender, ObjectEventArgs data)
     {
-        // Canvas.SetZIndex(data.GameObject.View, 10);
         GameCanvas.Children.Add(data.ImageElement);
+    }
+    
+    private void OnPlayerRemoved(object  sender, ObjectEventArgs data)
+    { 
+        GameCanvas.Children.Remove(data.GameObject.View);
     }
 
     private void OnEnemyCreated(object  sender, ObjectEventArgs data)
