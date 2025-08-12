@@ -1,6 +1,7 @@
 using Windows.Foundation;
 using Microsoft.UI.Xaml.Input;
 using SpaceInvadersGame.Models;
+using SpaceInvadersGame.Presentation;
 using SpaceInvadersGame.ViewModels;
 
 namespace SpaceInvadersGame;
@@ -28,6 +29,7 @@ public sealed partial class MainPage : Page
         ViewModel.ObstacleRemoved += OnObstacleRemoved;
         ViewModel.ExplosionEffectCreated += OnExplosionEffectCreated;
         ViewModel.ExplosionEffectRemoved += OnExplosionEffectRemoved;
+        ViewModel.GameOver += OnGameOver;
     }
     
     // Page Event Handlers
@@ -127,5 +129,29 @@ public sealed partial class MainPage : Page
     private void OnExplosionEffectRemoved(object sender, FrameworkElement element)
     {
         GameCanvas.Children.Remove(element);
+    }
+    
+    // Modal
+    private void OnGameOver(object sender, GameOverEventArgs e)
+    {
+        ShowGameOverDialog(e.Score);
+    }
+
+    private async void ShowGameOverDialog(int Score)
+    {
+        ContentDialog gameOverDialog = new ContentDialog
+        {
+            Title = "Game Over",
+            Content = "Score: " + Score,
+            PrimaryButtonText = "Menu",
+            XamlRoot = this.XamlRoot,
+        };
+        
+        ContentDialogResult result = await gameOverDialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            ViewModel.Stop();
+            this.Frame.Navigate(typeof(MenuPage));
+        }  
     }
 }

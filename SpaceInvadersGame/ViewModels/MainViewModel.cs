@@ -34,6 +34,7 @@ public partial class MainViewModel : ObservableObject
         _gameManager.ProjectileHitPlayer += OnProjectileHitPlayer;
         _gameManager.ProjectileExceededScreen += OnProjectileExeededScreen;
         _gameManager.ObstacleHit += OnObstacleHit;
+        _gameManager.GameOver += OnGameOver;
     }
 
     public event EventHandler<PlayerGameObject> PlayerCreated;
@@ -51,6 +52,8 @@ public partial class MainViewModel : ObservableObject
     public event EventHandler<FrameworkElement> ExplosionEffectCreated;
     public event EventHandler<FrameworkElement> ExplosionEffectRemoved;
 
+    public event EventHandler<GameOverEventArgs> GameOver;
+
     public void Start()
     {
         _gameManager.Start();
@@ -67,6 +70,7 @@ public partial class MainViewModel : ObservableObject
     
     public void Update(TimeSpan deltaTime, Rect bounds)
     {
+        if (!_gameManager.IsGameRunning) return;
         _gameManager.Update(deltaTime, bounds);
         
         foreach (var go in _gameObjects)
@@ -174,6 +178,11 @@ public partial class MainViewModel : ObservableObject
         ProjectileRemoved?.Invoke(this, projectile);
         
         obstacle.View.Opacity = (obstacle.Model.Health / 100);
+    }
+
+    private void OnGameOver(object? sender, GameOverEventArgs e)
+    {
+        GameOver?.Invoke(this, e);
     }
     
     private void CreatePlayer()
@@ -297,7 +306,6 @@ public partial class MainViewModel : ObservableObject
         _gameObjects.Add(projectile);
         _gameManager.AddGameObject(projectile);
 
-        // var eventData = new ObjectEventArgs(projectile, projectileImage);
         ProjectileCreated.Invoke(this, projectile);
     }
 }

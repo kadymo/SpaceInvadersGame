@@ -8,7 +8,6 @@ namespace SpaceInvadersGame;
 public class GameManager
 {
     private List<GameObject> _gameObjects;
-    private GameObject _player;
     
     private readonly InputManager _inputManager;
     private readonly SoundManager _soundManager;
@@ -20,6 +19,7 @@ public class GameManager
     
     private DateTime _lastUpdate;
     private bool _isGameRunning;
+    public bool IsGameRunning => _isGameRunning;
     
     private IEnumerable<PlayerGameObject> GetPlayers() => _gameObjects.OfType<PlayerGameObject>();
     private IEnumerable<EnemyGameObject> GetEnemies() => _gameObjects.OfType<EnemyGameObject>();
@@ -37,6 +37,7 @@ public class GameManager
     public event EventHandler<CollisionEventArgs> ProjectileHitEnemy;
     public event EventHandler<CollisionEventArgs> ProjectileHitPlayer;
     public event EventHandler<CollisionEventArgs> ObstacleHit;
+    public event EventHandler<GameOverEventArgs> GameOver;
 
     private double _swarmDirection = 1.0f;
     
@@ -86,10 +87,6 @@ public class GameManager
     public void AddGameObject(GameObject gameObject)
     {
         _gameObjects.Add(gameObject);
-        if (gameObject.Model is Player playerModel)
-        {
-            _player = gameObject;
-        }
     }
     
     public void RemoveGameObject(GameObject gameObject)
@@ -120,7 +117,18 @@ public class GameManager
     
     public void Update(TimeSpan deltaTime, Rect bounds)
     {
+        if (Score >= 500)
+        {
+            Stop();
+            
+            var eventArgs = new GameOverEventArgs();
+            eventArgs.Score = Score;
+            GameOver.Invoke(this, eventArgs);
+            return;
+        }
+        
         if (!_isGameRunning) return;
+        
         float deltaTimeSeconds = (float)deltaTime.TotalSeconds;
         
         // Movement
