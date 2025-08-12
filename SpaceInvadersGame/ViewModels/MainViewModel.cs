@@ -72,29 +72,6 @@ public partial class MainViewModel : ObservableObject
         foreach (var go in _gameObjects)
         {
             go.UpdateViewPosition();
-            // if (go.Model is Player player)
-            // {
-            //     Canvas.SetLeft(go.View, player.PositionX);
-            //     Canvas.SetTop(go.View, player.PositionY);
-            // }
-            //
-            // if (go.Model is Enemy enemy)
-            // {
-            //     Canvas.SetLeft(go.View, enemy.PositionX);
-            //     Canvas.SetTop(go.View, enemy.PositionY);
-            // }
-            //
-            // if (go.Model is Projectile projectile)
-            // {
-            //     Canvas.SetLeft(go.View, projectile.PositionX);
-            //     Canvas.SetTop(go.View, projectile.PositionY);
-            // }
-            //
-            // if (go.Model is Obstacle obstacle)
-            // {
-            //     Canvas.SetLeft(go.View, obstacle.PositionX);
-            //     Canvas.SetTop(go.View, obstacle.PositionY);;
-            // }
         }
     }
 
@@ -293,7 +270,6 @@ public partial class MainViewModel : ObservableObject
                 _gameObjects.Add(obstacle);
                 _gameManager.AddGameObject(obstacle);
                 
-                // var eventData = new ObjectEventArgs(obstacleGameObject, obstacleImage);
                 ObstacleCreated.Invoke(this, obstacle);
             }
         }
@@ -301,6 +277,7 @@ public partial class MainViewModel : ObservableObject
 
     private void CreateProjectile(Projectile projectileModel)
     {
+        
         Image projectileImage = new Image
         {
             Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Projectile.gif")),
