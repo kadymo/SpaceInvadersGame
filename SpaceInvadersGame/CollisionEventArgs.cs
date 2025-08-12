@@ -4,12 +4,27 @@ namespace SpaceInvadersGame;
 
 public class CollisionEventArgs
 {
-    public GameObject ProjectileGameObject { get; set; }
-    public GameObject TargetGameObject { get; set; }
+    public ProjectileGameObject Projectile { get; set; }
+    public PlayerGameObject PlayerTarget { get; set; }
+    public EnemyGameObject EnemyTarget { get; set; }
+    public ObstacleGameObject ObstacleTarget { get; set; }
 
-    public CollisionEventArgs(GameObject projectileGameObject, GameObject targetGameObject)
+    
+    public CollisionEventArgs(ProjectileGameObject projectile, PlayerGameObject player)
     {
-        ProjectileGameObject = projectileGameObject;
-        TargetGameObject = targetGameObject;
+        Projectile = projectile;
+        PlayerTarget = player;
+    }
+    
+    public CollisionEventArgs(ProjectileGameObject projectile, EnemyGameObject enemy)
+    {
+        Projectile = projectile;
+        EnemyTarget = enemy;
+    }
+    
+    public CollisionEventArgs(ProjectileGameObject projectile, ObstacleGameObject obstacle)
+    {
+        Projectile = projectile;
+        ObstacleTarget = obstacle;
     }
 }
