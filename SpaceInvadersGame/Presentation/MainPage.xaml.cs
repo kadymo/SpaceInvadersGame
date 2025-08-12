@@ -1,5 +1,6 @@
 using Windows.Foundation;
 using Microsoft.UI.Xaml.Input;
+using SpaceInvadersGame.Models;
 using SpaceInvadersGame.ViewModels;
 
 namespace SpaceInvadersGame;
@@ -77,56 +78,54 @@ public sealed partial class MainPage : Page
     
     private void OnPageKeyDown(object sender, KeyRoutedEventArgs e) => ViewModel.InputManager.KeyDown(e.Key);
     private void OnPageKeyUp(object sender, KeyRoutedEventArgs e) => ViewModel.InputManager.KeyUp(e.Key);
-
     
-    private void OnPlayerCreated(object  sender, ObjectEventArgs data)
+    private void OnPlayerCreated(object  sender, PlayerGameObject player)
     {
-        GameCanvas.Children.Add(data.ImageElement);
+        GameCanvas.Children.Add(player.View);
     }
     
-    private void OnPlayerRemoved(object  sender, ObjectEventArgs data)
+    private void OnPlayerRemoved(object  sender, PlayerGameObject player)
     { 
-        GameCanvas.Children.Remove(data.GameObject.View);
+        GameCanvas.Children.Remove(player.View);
     }
 
-    private void OnEnemyCreated(object  sender, ObjectEventArgs data)
+    private void OnEnemyCreated(object  sender, EnemyGameObject enemy)
     {
-        GameCanvas.Children.Add(data.ImageElement);
+        GameCanvas.Children.Add(enemy.View);
     }
     
-    private void OnEnemyRemoved(object  sender, ObjectEventArgs data)
+    private void OnEnemyRemoved(object  sender, EnemyGameObject enemy)
     { 
-        GameCanvas.Children.Remove(data.GameObject.View);
+        GameCanvas.Children.Remove(enemy.View);
     }
 
-    private void OnProjectileCreated(object  sender, ObjectEventArgs data)
+    private void OnProjectileCreated(object  sender, ProjectileGameObject projectile)
     {
-        // Canvas.SetZIndex(data.GameObject.View, 10);
-        GameCanvas.Children.Add(data.ImageElement);
+        GameCanvas.Children.Add(projectile.View);
     }
 
-    private void OnProjectileRemoved(object sender, ObjectEventArgs data)
+    private void OnProjectileRemoved(object sender, ProjectileGameObject projectile)
     {
-        GameCanvas.Children.Remove(data.GameObject.View);
+        GameCanvas.Children.Remove(projectile.View);
     }
     
-    private void OnObstacleCreated(object sender, ObjectEventArgs data)
+    private void OnObstacleCreated(object sender, ObstacleGameObject obstacle)
     {
-        GameCanvas.Children.Add(data.ImageElement);
+        GameCanvas.Children.Add(obstacle.View);
     }
     
-    private void OnObstacleRemoved(object sender, ObjectEventArgs data)
+    private void OnObstacleRemoved(object sender, ObstacleGameObject obstacle)
     {
-        GameCanvas.Children.Remove(data.GameObject.View);
+        GameCanvas.Children.Remove(obstacle.View);
     }
 
-    private void OnExplosionEffectCreated(object sender, ObjectEventArgs data)
+    private void OnExplosionEffectCreated(object sender, FrameworkElement element)
     {
-        GameCanvas.Children.Add(data.ImageElement);
+        GameCanvas.Children.Add(element);
     }
     
-    private void OnExplosionEffectRemoved(object sender, ObjectEventArgs data)
+    private void OnExplosionEffectRemoved(object sender, FrameworkElement element)
     {
-        GameCanvas.Children.Remove(data.ImageElement);
+        GameCanvas.Children.Remove(element);
     }
 }

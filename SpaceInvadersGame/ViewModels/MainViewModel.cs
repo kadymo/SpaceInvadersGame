@@ -36,16 +36,20 @@ public partial class MainViewModel : ObservableObject
         _gameManager.ObstacleHit += OnObstacleHit;
     }
 
-    public event EventHandler<ObjectEventArgs> PlayerCreated;
-    public event EventHandler<ObjectEventArgs> PlayerRemoved;
-    public event EventHandler<ObjectEventArgs> EnemyCreated;
-    public event EventHandler<ObjectEventArgs> EnemyRemoved;
-    public event EventHandler<ObjectEventArgs> ProjectileCreated;
-    public event EventHandler<ObjectEventArgs> ProjectileRemoved;
-    public event EventHandler<ObjectEventArgs> ObstacleCreated;
-    public event EventHandler<ObjectEventArgs> ObstacleRemoved;
-    public event EventHandler<ObjectEventArgs> ExplosionEffectCreated;
-    public event EventHandler<ObjectEventArgs> ExplosionEffectRemoved;
+    public event EventHandler<PlayerGameObject> PlayerCreated;
+    public event EventHandler<PlayerGameObject> PlayerRemoved;
+    
+    public event EventHandler<EnemyGameObject> EnemyCreated;
+    public event EventHandler<EnemyGameObject> EnemyRemoved;
+    
+    public event EventHandler<ProjectileGameObject> ProjectileCreated;
+    public event EventHandler<ProjectileGameObject> ProjectileRemoved;
+    
+    public event EventHandler<ObstacleGameObject> ObstacleCreated;
+    public event EventHandler<ObstacleGameObject> ObstacleRemoved;
+    
+    public event EventHandler<FrameworkElement> ExplosionEffectCreated;
+    public event EventHandler<FrameworkElement> ExplosionEffectRemoved;
 
     public void Start()
     {
@@ -67,29 +71,30 @@ public partial class MainViewModel : ObservableObject
         
         foreach (var go in _gameObjects)
         {
-            if (go.Model is Player player)
-            {
-                Canvas.SetLeft(go.View, player.PositionX);
-                Canvas.SetTop(go.View, player.PositionY);
-            }
-
-            if (go.Model is Enemy enemy)
-            {
-                Canvas.SetLeft(go.View, enemy.PositionX);
-                Canvas.SetTop(go.View, enemy.PositionY);
-            }
-            
-            if (go.Model is Projectile projectile)
-            {
-                Canvas.SetLeft(go.View, projectile.PositionX);
-                Canvas.SetTop(go.View, projectile.PositionY);
-            }
-            
-            if (go.Model is Obstacle obstacle)
-            {
-                Canvas.SetLeft(go.View, obstacle.PositionX);
-                Canvas.SetTop(go.View, obstacle.PositionY);;
-            }
+            go.UpdateViewPosition();
+            // if (go.Model is Player player)
+            // {
+            //     Canvas.SetLeft(go.View, player.PositionX);
+            //     Canvas.SetTop(go.View, player.PositionY);
+            // }
+            //
+            // if (go.Model is Enemy enemy)
+            // {
+            //     Canvas.SetLeft(go.View, enemy.PositionX);
+            //     Canvas.SetTop(go.View, enemy.PositionY);
+            // }
+            //
+            // if (go.Model is Projectile projectile)
+            // {
+            //     Canvas.SetLeft(go.View, projectile.PositionX);
+            //     Canvas.SetTop(go.View, projectile.PositionY);
+            // }
+            //
+            // if (go.Model is Obstacle obstacle)
+            // {
+            //     Canvas.SetLeft(go.View, obstacle.PositionX);
+            //     Canvas.SetTop(go.View, obstacle.PositionY);;
+            // }
         }
     }
 
@@ -101,20 +106,20 @@ public partial class MainViewModel : ObservableObject
     {
         Score = "SCORE: " + _gameManager.Score;
         
-        var targetGameObject = collisionData.TargetGameObject;
-        var projectileGameObject = collisionData.ProjectileGameObject;
+        var projectile = collisionData.Projectile;
+        var enemy = collisionData.EnemyTarget;
 
-        var explosionLeft = Canvas.GetLeft(targetGameObject.View);
-        var explosionTop = Canvas.GetTop(targetGameObject.View);
+        var explosionLeft = Canvas.GetLeft(enemy.View);
+        var explosionTop = Canvas.GetTop(enemy.View);
             
-        _gameObjects.Remove(targetGameObject);
-        _gameManager.RemoveGameObject(targetGameObject);
+        _gameObjects.Remove(enemy);
+        _gameManager.RemoveGameObject(enemy);
         
-        _gameObjects.Remove(projectileGameObject);
-        _gameManager.RemoveGameObject(projectileGameObject);
+        _gameObjects.Remove(projectile);
+        _gameManager.RemoveGameObject(projectile);
         
-        EnemyRemoved?.Invoke(this, new ObjectEventArgs(targetGameObject, targetGameObject.View));
-        ProjectileRemoved?.Invoke(this, new ObjectEventArgs(projectileGameObject));
+        EnemyRemoved?.Invoke(this, enemy);
+        ProjectileRemoved?.Invoke(this, projectile);
            
         Image explosionImage = new Image
         {
@@ -126,38 +131,32 @@ public partial class MainViewModel : ObservableObject
         Canvas.SetLeft(explosionImage, explosionLeft);
         Canvas.SetTop(explosionImage, explosionTop);
 
-        ExplosionEffectCreated(this, new ObjectEventArgs(explosionImage));
+        ExplosionEffectCreated(this, explosionImage);
         await Task.Delay(500);
-        ExplosionEffectRemoved(this, new ObjectEventArgs(explosionImage));
+        ExplosionEffectRemoved(this, explosionImage);
     }
 
     private async void OnProjectileHitPlayer(object? sender, CollisionEventArgs collisionData)
     {
-        var targetGameObject = collisionData.TargetGameObject;
-        var projectileGameObject = collisionData.ProjectileGameObject;
+        var projectile = collisionData.Projectile;
+        var player = collisionData.PlayerTarget;
 
-        _gameObjects.Remove(projectileGameObject);
-        _gameManager.RemoveGameObject(projectileGameObject);
-        ProjectileRemoved?.Invoke(this, new ObjectEventArgs(projectileGameObject));
+        _gameObjects.Remove(projectile);
+        _gameManager.RemoveGameObject(projectile);
+        ProjectileRemoved?.Invoke(this, projectile);
         
-        Console.WriteLine("Antes: " + _gameManager.Score);
-        if (targetGameObject.Model is Player playerModel)
-        {
-            playerModel.Lifes -= 1; 
-            Console.WriteLine("Depois: " + _gameManager.Score);
-            
-            if (playerModel.Lifes <= 0)
-            { 
-                _gameObjects.Remove(targetGameObject);
-                _gameManager.RemoveGameObject(targetGameObject);
-                
-                PlayerRemoved?.Invoke(this, new ObjectEventArgs(targetGameObject, targetGameObject.View));
-            }
+        player.Model.Lifes -= 1;
+        if (player.Model.Lifes <= 0)
+        { 
+            _gameObjects.Remove(player);
+            _gameManager.RemoveGameObject(player);
+
+            PlayerRemoved?.Invoke(this, player);
         }
 
-        
-        var explosionLeft = Canvas.GetLeft(targetGameObject.View);
-        var explosionTop = Canvas.GetTop(targetGameObject.View);
+
+        var explosionLeft = Canvas.GetLeft(player.View);
+        var explosionTop = Canvas.GetTop(player.View);
         
         Image explosionImage = new Image
         {
@@ -169,38 +168,35 @@ public partial class MainViewModel : ObservableObject
         Canvas.SetLeft(explosionImage, explosionLeft);
         Canvas.SetTop(explosionImage, explosionTop);
 
-        ExplosionEffectCreated(this, new ObjectEventArgs(explosionImage));
+        ExplosionEffectCreated(this, explosionImage);
         await Task.Delay(500);
-        ExplosionEffectRemoved(this, new ObjectEventArgs(explosionImage));
+        ExplosionEffectRemoved(this, explosionImage);
     }
 
-    private void OnProjectileExeededScreen(object? sender, GameObject gameObject)
+    private void OnProjectileExeededScreen(object? sender, ProjectileGameObject projectile)
     {
-        _gameObjects.Remove(gameObject);
-        ProjectileRemoved?.Invoke(this, new ObjectEventArgs(gameObject));
+        _gameObjects.Remove(projectile);
+        ProjectileRemoved?.Invoke(this, projectile);
     }
     
     private void OnObstacleHit(object? sender, CollisionEventArgs collisionData)
     {
-        var obstacleGameObject = collisionData.TargetGameObject;
-        var projectileGameObject = collisionData.ProjectileGameObject;
+        var projectile = collisionData.Projectile;
+        var obstacle = collisionData.ObstacleTarget;
 
-        if (obstacleGameObject.Model is Obstacle obstacleModel)
-        {
-            obstacleModel.Health -= 5;
-                
-            if (obstacleModel.Health <= 0)
-            {
-                _gameObjects.Remove(obstacleGameObject);
-                ObstacleRemoved?.Invoke(this, new ObjectEventArgs(obstacleGameObject));
-            }
-                
-            _gameObjects.Remove(projectileGameObject); 
-            
-            ProjectileRemoved?.Invoke(this, new ObjectEventArgs(projectileGameObject));    
-                
-            obstacleGameObject.View.Opacity = (obstacleModel.Health / 100);
+        obstacle.Model.Health -= 5;
+        
+        if (obstacle.Model.Health <= 0) 
+        { 
+            _gameObjects.Remove(obstacle); 
+            ObstacleRemoved?.Invoke(this, obstacle);
         }
+                
+        _gameObjects.Remove(projectile);
+        
+        ProjectileRemoved?.Invoke(this, projectile);
+        
+        obstacle.View.Opacity = (obstacle.Model.Health / 100);
     }
     
     private void CreatePlayer()
@@ -212,12 +208,12 @@ public partial class MainViewModel : ObservableObject
             Height = 50,
         };
 
-        GameObject playerGameObject = new GameObject(playerImage, new Player());
-        _gameObjects.Add(playerGameObject);
-        _gameManager.AddGameObject(playerGameObject);
+        PlayerGameObject player = new PlayerGameObject(playerImage, new Player());
+        _gameObjects.Add(player);
+        _gameManager.AddGameObject(player);
         
-        var eventData = new ObjectEventArgs(playerGameObject, playerImage);
-        PlayerCreated.Invoke(this, eventData);
+        // var eventData = new ObjectEventArgs(player, playerImage);
+        PlayerCreated.Invoke(this, player);
     }
     
     // Game Objects Creation
@@ -245,30 +241,27 @@ public partial class MainViewModel : ObservableObject
         {
             for (int j = 0; j < columns; j++)
             {
-                Enemy enemy = new Enemy();
-                if (i == 0) enemy.Type = EnemyType.HIGH;
-                else if (i == 1 || i == 2) enemy.Type = EnemyType.MEDIUM;
-                else enemy.Type = EnemyType.LOW;
+                Enemy enemyModel = new Enemy();
+                if (i == 0) enemyModel.Type = EnemyType.HIGH;
+                else if (i == 1 || i == 2) enemyModel.Type = EnemyType.MEDIUM;
+                else enemyModel.Type = EnemyType.LOW;
                 
                 Image enemyImage = new Image
                 {
-                    Source = new BitmapImage(GetEnemyImageUri(enemy.Type)),
+                    Source = new BitmapImage(GetEnemyImageUri(enemyModel.Type)),
                     Width = 40,
                     Height = 40,
                 };
                 
-                GameObject enemyGameObject = new GameObject(enemyImage, enemy);
-                if (enemyGameObject.Model is Enemy enemyModel)
-                {
-                    enemyModel.PositionX = j * (enemyWidth + spacing);
-                    enemyModel.PositionY = i * (enemyHeight + spacing);
-                }
+                EnemyGameObject enemy = new EnemyGameObject(enemyImage, enemyModel);
+                enemy.Model.PositionX = j * (enemyWidth + spacing); 
+                enemy.Model.PositionY = i * (enemyHeight + spacing);
                 
-                _gameObjects.Add(enemyGameObject); 
-                _gameManager.AddGameObject(enemyGameObject);
+                _gameObjects.Add(enemy); 
+                _gameManager.AddGameObject(enemy);
                 
-                var eventData = new ObjectEventArgs(enemyGameObject, enemyImage);
-                EnemyCreated.Invoke(this, eventData);
+                // var eventData = new ObjectEventArgs(enemyGameObject, enemyImage);
+                EnemyCreated.Invoke(this, enemy);
             }
         }
     }
@@ -292,18 +285,16 @@ public partial class MainViewModel : ObservableObject
                     Height = 45,
                 };
                 
-                GameObject obstacleGameObject = new GameObject(obstacleImage, new Obstacle());
+                ObstacleGameObject obstacle = new ObstacleGameObject(obstacleImage, new Obstacle());
                 
-                if (obstacleGameObject.Model is Obstacle obstacleModel)
-                {
-                    obstacleModel.PositionX = j * (obstacleWidth + spacing);
-                    obstacleModel.PositionY = i * (obstacleHeight + spacing) + 340;
-                }
-                _gameObjects.Add(obstacleGameObject);
-                _gameManager.AddGameObject(obstacleGameObject);
+                obstacle.Model.PositionX = j * (obstacleWidth + spacing); 
+                obstacle.Model.PositionY = i * (obstacleHeight + spacing) + 340;
                 
-                var eventData = new ObjectEventArgs(obstacleGameObject, obstacleImage);
-                ObstacleCreated.Invoke(this, eventData);
+                _gameObjects.Add(obstacle);
+                _gameManager.AddGameObject(obstacle);
+                
+                // var eventData = new ObjectEventArgs(obstacleGameObject, obstacleImage);
+                ObstacleCreated.Invoke(this, obstacle);
             }
         }
     }
@@ -322,14 +313,14 @@ public partial class MainViewModel : ObservableObject
         rotation.CenterY = projectileImage.Height / 2;
         projectileImage.RenderTransform = rotation;
         
-        GameObject projectileGameObject = new GameObject(projectileImage, projectileModel);
-        projectileGameObject.Rotation = rotation;
-        projectileGameObject.Rotation.Angle = 90;
+        ProjectileGameObject projectile = new ProjectileGameObject(projectileImage, projectileModel);
+        projectile.Rotation = rotation;
+        projectile.Rotation.Angle = 90;
         
-        _gameObjects.Add(projectileGameObject);
-        _gameManager.AddGameObject(projectileGameObject);
+        _gameObjects.Add(projectile);
+        _gameManager.AddGameObject(projectile);
 
-        var eventData = new ObjectEventArgs(projectileGameObject, projectileImage);
-        ProjectileCreated.Invoke(this, eventData);
+        // var eventData = new ObjectEventArgs(projectile, projectileImage);
+        ProjectileCreated.Invoke(this, projectile);
     }
 }

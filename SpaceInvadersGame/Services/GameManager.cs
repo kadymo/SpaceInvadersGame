@@ -21,10 +21,19 @@ public class GameManager
     private DateTime _lastUpdate;
     private bool _isGameRunning;
     
+    private IEnumerable<PlayerGameObject> GetPlayers() => _gameObjects.OfType<PlayerGameObject>();
+    private IEnumerable<EnemyGameObject> GetEnemies() => _gameObjects.OfType<EnemyGameObject>();
+        
+    private IEnumerable<ProjectileGameObject> GetProjectiles() => _gameObjects.OfType<ProjectileGameObject>();
+    private IEnumerable<ProjectileGameObject> GetPlayerProjectiles() => GetProjectiles().Where(p => p.Model.Firer == ProjectileFirer.PLAYER);
+    private IEnumerable<ProjectileGameObject> GetEnemyProjectiles() => GetProjectiles().Where(p => p.Model.Firer == ProjectileFirer.ENEMY);
+        
+    private IEnumerable<ObstacleGameObject> GetObstacles() => _gameObjects.OfType<ObstacleGameObject>();
+    
     public int Score { get; set; }
     
     public event EventHandler<Projectile> ProjectileFired;
-    public event EventHandler<GameObject> ProjectileExceededScreen;
+    public event EventHandler<ProjectileGameObject> ProjectileExceededScreen;
     public event EventHandler<CollisionEventArgs> ProjectileHit;
     public event EventHandler<CollisionEventArgs> ProjectileHitPlayer;
     public event EventHandler<CollisionEventArgs> ObstacleHit;
@@ -39,6 +48,7 @@ public class GameManager
 
         this.ProjectileFired += (sender, projectileModel) =>
         {
+            
             _soundManager.PlaySound("ProjectileFiredSound.wav");
         };
 
@@ -49,21 +59,18 @@ public class GameManager
 
         this.ProjectileHit += (sender, collisionData) =>
         {
-            if (collisionData.TargetGameObject.Model is Enemy enemyModel)
-            {
-                switch (enemyModel.Type)
-                {
-                    case EnemyType.LOW:
-                        Score += 10;
-                        break;
-                    case EnemyType.MEDIUM:
-                        Score += 20;
-                        break;
-                    case EnemyType.HIGH:
-                        Score += 40;
-                        break;
+            switch (collisionData.EnemyTarget.Model.Type) 
+            { 
+                case EnemyType.LOW: 
+                    Score += 10; 
+                    break;
+                case EnemyType.MEDIUM: 
+                    Score += 20; 
+                    break;
+                case EnemyType.HIGH: 
+                    Score += 40; 
+                    break; 
                 }
-            }
             
             _canShoot = true;
             _soundManager.PlaySound("ProjectileHitSound.wav");
@@ -116,267 +123,258 @@ public class GameManager
         if (!_isGameRunning) return;
         float deltaTimeSeconds = (float)deltaTime.TotalSeconds;
         
-        var playerModel = _player.Model as Player;
-        var playerGameObject = _gameObjects.Find(go => go.Model is Player);
+        // Fires
+        FirePlayerProjectile();
         
-        GameObject playerProjectileGameObject = _gameObjects.Find(go => go.Model is Projectile proj && proj.Firer == ProjectileFirer.PLAYER);
-        var enemyProjectiles = _gameObjects.Where(go => go.Model is Projectile proj && proj.Firer == ProjectileFirer.ENEMY).ToList();
-        
-        MovementPlayerProjectile(playerProjectileGameObject, deltaTimeSeconds);
+        // Movement
+        MovementPlayer(deltaTimeSeconds);
+        MovementPlayerProjectile(deltaTimeSeconds);
         
         MovementEnemies(deltaTimeSeconds, bounds);
-        MovementPlayer(playerModel, deltaTimeSeconds);
-        
-        FirePlayerProjectile(playerModel);
+        MovementEnemyProjectile(deltaTimeSeconds, bounds);
         
         // Collisions
-        
+        VerifyEnemiesCollision();
+        VerifyPlayerCollision();
         VerifyObstacleCollision();
-        VerifyCollision();
-        foreach (var enemyProjectile in enemyProjectiles)
-        {
-            MovementEnemyProjectile(enemyProjectile, deltaTimeSeconds, bounds);
-            VerifyPlayerCollision(playerGameObject, enemyProjectile);
-        }
     }
 
-    private void VerifyCollision()
+    private void VerifyEnemiesCollision()
     {
-        var projectileGameObject = _gameObjects.Find(go => go.Model is Projectile proj && proj.Firer == ProjectileFirer.PLAYER);
-        
-        if (projectileGameObject == null) return;
-        
-        for (int i = _gameObjects.Count - 1; i>= 0; i--)
+        var playerProjectiles = GetPlayerProjectiles().ToList();
+        var enemies = GetEnemies().ToList();
+
+        foreach (var projectile in playerProjectiles)
         {
-            var enemyGameObject = _gameObjects[i];
-            if (projectileGameObject.Model is Projectile projectileModel && enemyGameObject.Model is Enemy enemyModel)
+            foreach (var enemy in enemies)
             {
-                var heightCollisionCondition = projectileModel.PositionY + 10 < enemyModel.PositionY + enemyGameObject.View.Height;
+                var heightCollisionCondition = projectile.Model.PositionY + 10 < enemy.Model.PositionY + enemy.View.Height;
               
-                var widthCollisionCondition = projectileModel.PositionX + projectileGameObject.View.Width - 20 > enemyModel.PositionX 
-                                              && projectileModel.PositionX - 10 < enemyModel.PositionX + enemyGameObject.View.Width;
+                var widthCollisionCondition = projectile.Model.PositionX + projectile.View.Width - 20 > enemy.Model.PositionX 
+                                              && projectile.Model.PositionX - 10 < enemy.Model.PositionX + enemy.View.Width;
 
                 if (heightCollisionCondition && widthCollisionCondition)
                 {
-                    var collisionData = new CollisionEventArgs(projectileGameObject, enemyGameObject);
+                    var collisionData = new CollisionEventArgs(projectile, enemy);
                     ProjectileHit?.Invoke(this, collisionData);
                     break;
-                }
+                }            
             }
         }
     }
 
-    private void VerifyPlayerCollision(GameObject playerGameObject, GameObject projectileGameObject)
+    private void VerifyPlayerCollision()
     {
-        if (projectileGameObject == null) return;
-        
-        if (playerGameObject.Model is Player playerModel && projectileGameObject.Model is Projectile projectileModel) 
-        { 
-            var heightCollisionCondition = projectileModel.PositionY + projectileGameObject.View.Height > playerModel.PositionY;
-            var widthCollisionCondition = projectileModel.PositionX + projectileGameObject.View.Width - 20 > playerModel.PositionX 
-                                          && projectileModel.PositionX - 10 < playerModel.PositionX + _player.View.Width;
+        var player = GetPlayers().ToList().First();
+        var enemyProjectiles = GetEnemyProjectiles().ToList();
+
+        foreach (var projectile in enemyProjectiles)
+        {
+            var heightCollisionCondition = projectile.Model.PositionY + projectile.View.Height > player.Model.PositionY; 
+            var widthCollisionCondition = projectile.Model.PositionX + projectile.View.Width - 20 > player.Model.PositionX 
+                                          && projectile.Model.PositionX - 10 < player.Model.PositionX + player.View.Width;
 
             if (heightCollisionCondition && widthCollisionCondition) 
             { 
-                var collisionData = new CollisionEventArgs(projectileGameObject, _player); 
+                var collisionData = new CollisionEventArgs(projectile, player); 
                 ProjectileHitPlayer?.Invoke(this, collisionData);
-            }
+            }   
         }
     }
     
     private void VerifyObstacleCollision()
     {
-        var playerProjectile = _gameObjects.Find(go => go.Model is Projectile proj && proj.Firer == ProjectileFirer.PLAYER);
-        if (playerProjectile != null)
+        var obstacles = GetObstacles().ToList();
+        
+        var playerProjectiles = GetPlayerProjectiles().ToList();
+        foreach (var projectile in playerProjectiles)
         {
-            CheckProjectileObstacleCollision(playerProjectile, true);
+            foreach (var obstacle in obstacles) CheckProjectileObstacleCollision(projectile, obstacle, true);
         }
-    
-        var enemyProjectiles = _gameObjects.Where(go => go.Model is Projectile proj && proj.Firer == ProjectileFirer.ENEMY).ToList();
-        foreach (var enemyProjectile in enemyProjectiles)
+        
+        var enemyProjectiles = GetEnemyProjectiles().ToList();
+        foreach (var projectile in enemyProjectiles)
         {
-            CheckProjectileObstacleCollision(enemyProjectile, false);
-        }
-    }
-
-    
-    private void CheckProjectileObstacleCollision(GameObject projectileGameObject, bool isPlayerProjectile)
-    {
-        for (int i = _gameObjects.Count - 1; i >= 0; i--)
-        {
-            var obstacleGameObject = _gameObjects[i];
-            if (projectileGameObject.Model is Projectile projectileModel && obstacleGameObject.Model is Obstacle obstacleModel)
-            {
-                bool heightCollisionCondition;
-            
-                if (isPlayerProjectile)
-                {
-                    heightCollisionCondition = projectileModel.PositionY <= obstacleModel.PositionY + obstacleGameObject.View.Height &&
-                                               projectileModel.PositionY + projectileGameObject.View.Height >= obstacleModel.PositionY;
-                }
-                else
-                {
-                    heightCollisionCondition = projectileModel.PositionY + projectileGameObject.View.Height >= obstacleModel.PositionY &&
-                                               projectileModel.PositionY <= obstacleModel.PositionY + obstacleGameObject.View.Height;
-                }
-            
-                bool widthCollisionCondition = projectileModel.PositionX + projectileGameObject.View.Width > obstacleModel.PositionX &&
-                                              projectileModel.PositionX < obstacleModel.PositionX + obstacleGameObject.View.Width;
-            
-                if (heightCollisionCondition && widthCollisionCondition)
-                {
-                    var collisionData = new CollisionEventArgs(projectileGameObject, obstacleGameObject);
-                    ObstacleHit?.Invoke(this, collisionData);
-                    break;
-                }
-            }
+            foreach (var obstacle in obstacles) CheckProjectileObstacleCollision(projectile, obstacle, false);
         }
     }
 
-
-    private void MovementPlayer(Player playerModel, float deltaTimeSeconds)
+    
+    private void CheckProjectileObstacleCollision(ProjectileGameObject projectile, ObstacleGameObject obstacle, bool isPlayerProjectile)
     {
+        bool heightCollisionCondition; 
+        if (isPlayerProjectile) 
+        { 
+            heightCollisionCondition = projectile.Model.PositionY <= obstacle.Model.PositionY + obstacle.View.Height && 
+                                       projectile.Model.PositionY + projectile.View.Height >= obstacle.Model.PositionY;
+        }
+        else 
+        { 
+            heightCollisionCondition = projectile.Model.PositionY + projectile.View.Height >= obstacle.Model.PositionY && 
+                                       projectile.Model.PositionY <= obstacle.Model.PositionY + obstacle.View.Height;
+        }
+            
+        bool widthCollisionCondition = projectile.Model.PositionX + projectile.View.Width > obstacle.Model.PositionX && 
+                                       projectile.Model.PositionX < obstacle.Model.PositionX + obstacle.View.Width;
+
+        if (heightCollisionCondition && widthCollisionCondition) 
+        { 
+            var collisionData = new CollisionEventArgs(projectile, obstacle); 
+            ObstacleHit?.Invoke(this, collisionData); 
+        }
+    }
+    
+    private Rect GetObjectBounds(GameObject gameObject)
+    {
+        double x = 0, y = 0;
+        switch (gameObject)
+        {
+            case PlayerGameObject player:
+                x = player.Model.PositionX;
+                y = player.Model.PositionY;
+                break;
+            case EnemyGameObject enemy:
+                x = enemy.Model.PositionX;
+                y = enemy.Model.PositionY;
+                break;
+            case ProjectileGameObject projectile:
+                x = projectile.Model.PositionX;
+                y = projectile.Model.PositionY;
+                break;
+            case ObstacleGameObject obstacle:
+                x = obstacle.Model.PositionX;
+                y = obstacle.Model.PositionY;
+                break;
+        }
+        return new Rect(x, y, gameObject.View.Width, gameObject.View.Height);
+    }
+
+
+
+    private void MovementPlayer(float deltaTimeSeconds)
+    {
+        var player = GetPlayers().ToList().First();
+        
         if (_inputManager.isKeyPressed(VirtualKey.W) || _inputManager.isKeyPressed(VirtualKey.Up))
         {
-            playerModel.PositionY -= playerModel.Speed * deltaTimeSeconds;
+            player.Model.PositionY -= player.Model.Speed * deltaTimeSeconds;
         }
 
         if (_inputManager.isKeyPressed(VirtualKey.S) || _inputManager.isKeyPressed(VirtualKey.Down))
         {
-            playerModel.PositionY += playerModel.Speed * deltaTimeSeconds;
+            player.Model.PositionY += player.Model.Speed * deltaTimeSeconds;
         }
         
         if (_inputManager.isKeyPressed(VirtualKey.A) || _inputManager.isKeyPressed(VirtualKey.Left)) 
         {
-            playerModel.PositionX -= playerModel.Speed * deltaTimeSeconds;
+            player.Model.PositionX -= player.Model.Speed * deltaTimeSeconds;
         }
 
         if (_inputManager.isKeyPressed(VirtualKey.D) || _inputManager.isKeyPressed(VirtualKey.Right))
         {
-            playerModel.PositionX += playerModel.Speed * deltaTimeSeconds;
+            player.Model.PositionX += player.Model.Speed * deltaTimeSeconds;
         }   
     }
 
     private void MovementEnemies(float deltaTimeSeconds, Rect bounds)
     {
-        var enemies = _gameObjects.Where(x => x.Model is Enemy).Select(x => x).ToList();
+        var enemies = GetEnemies().ToList();
         bool hitEdge = false;
-        foreach (var enemy in enemies)
-        {
-            if (enemy.Model is Enemy enemyModel)
-            {
-                enemyModel.PositionX += enemyModel.Speed * _swarmDirection * deltaTimeSeconds;
-            }
-        }
+        foreach (var enemy in enemies) enemy.Model.PositionX += enemy.Model.Speed * _swarmDirection * deltaTimeSeconds;
         
-        double maxX = enemies.Max(enemy => ((Enemy)enemy.Model).PositionX + enemy.View.Width);
-        double minX = enemies.Min(enemy => ((Enemy)enemy.Model).PositionX);
+        double maxX = enemies.Max(enemy => enemy.Model.PositionX + enemy.View.Width);
+        double minX = enemies.Min(enemy => enemy.Model.PositionX);
 
         if (maxX > bounds.Right)
         {
             double correction = maxX - bounds.Right;
-            foreach (var enemy in enemies)
-            {
-                if (enemy.Model is Enemy enemyModel)
-                {
-                    enemyModel.PositionX -= correction;
-                }
-            }
+            foreach (var enemy in enemies) enemy.Model.PositionX -= correction;
+            
             _swarmDirection = -1.0f;
             hitEdge = true;
         }
         else if (minX < bounds.Left)
         {
             double correction = bounds.Left - minX;
-            foreach (var enemy in enemies)
-            {
-                if (enemy.Model is Enemy enemyModel)
-                {
-                    enemyModel.PositionX += correction;
-                }
-            }
+            foreach (var enemy in enemies) enemy.Model.PositionX += correction;
+            
             _swarmDirection = 1.0f;
             hitEdge = true;
         } 
         
         if (hitEdge)
         {
-            foreach (var enemy in enemies)
-            {
-                if (enemy.Model is Enemy enemyModel)
-                {
-                    enemyModel.PositionY += 1;
-                }
-            }
+            foreach (var enemy in enemies) enemy.Model.PositionY += 1;
         }
     }
 
-    private void MovementPlayerProjectile(GameObject projectileGameObject, float deltaTimeSeconds)
+    private void MovementPlayerProjectile(float deltaTimeSeconds)
     {
-        if (projectileGameObject != null && projectileGameObject.Model is Projectile projectileModel)
+        var playerProjectiles = GetPlayerProjectiles().ToList();
+
+        foreach (var projectile in playerProjectiles)
         {
-            projectileModel.PositionY -= projectileModel.Speed * deltaTimeSeconds;
+            projectile.Model.PositionY -= projectile.Model.Speed * deltaTimeSeconds;
             
-            if (projectileModel.PositionY + projectileGameObject.View.Height < 0)
-            {
-                ProjectileExceededScreen?.Invoke(this, projectileGameObject);
-                _gameObjects.Remove(projectileGameObject);
-            }
+            if (projectile.Model.PositionY + projectile.View.Height < 0) 
+            { 
+                ProjectileExceededScreen?.Invoke(this, projectile); 
+                _gameObjects.Remove(projectile);
+            }   
         }
     }
 
-    private void FirePlayerProjectile(Player playerModel)
+    private void FirePlayerProjectile()
     {
+        var player = GetPlayers().ToList().First();
+        
         if (_inputManager.isKeyPressed(VirtualKey.Space) && _canShoot)
         {
             _canShoot = false;
             
             var projectileModel = new Projectile
             {
-                PositionX = playerModel.PositionX,
-                PositionY = playerModel.PositionY,
+                PositionX = player.Model.PositionX,
+                PositionY = player.Model.PositionY,
             };
 
             ProjectileFired?.Invoke(this, projectileModel);
         }
     }
 
-    private void MovementEnemyProjectile(GameObject projectileGameObject, float deltaTimeSeconds, Rect bounds)
+    private void MovementEnemyProjectile(float deltaTimeSeconds, Rect bounds)
     {
-        if (projectileGameObject != null && projectileGameObject.Model is Projectile projectileModel)
+        var enemyProjectiles = GetEnemyProjectiles().ToList();
+        
+        foreach (var projectile in enemyProjectiles)
         {
-            if (projectileModel.Firer != ProjectileFirer.ENEMY) return;
-
-            projectileModel.PositionY += projectileModel.Speed * deltaTimeSeconds;
+            projectile.Model.PositionY += projectile.Model.Speed * deltaTimeSeconds;
             
-            if (projectileModel.PositionY + projectileGameObject.View.Height > bounds.Bottom)
-            {
-                ProjectileExceededScreen?.Invoke(this, projectileGameObject);
-                _gameObjects.Remove(projectileGameObject);
-            }
-        } 
+            if (projectile.Model.PositionY + projectile.View.Height > bounds.Bottom) 
+            { 
+                ProjectileExceededScreen?.Invoke(this, projectile); 
+                _gameObjects.Remove(projectile);
+            }    
+        }
+        
     }
 
     private void FireEnemyProjectile()
     {
-        var highEnemies = _gameObjects.Where(x => x.Model is Enemy enemy && enemy.Type == EnemyType.HIGH).ToList();
+        var highEnemies = GetEnemies().Where(x => x.Model.Type == EnemyType.HIGH).ToList();
         if (!highEnemies.Any()) return;    
         
         Random random = new Random();
         var enemyIndex = random.Next(0, highEnemies.Count());
 
-        if (highEnemies.ElementAt(enemyIndex).Model is Enemy enemyModel)
-        {
-            var projectileModel = new Projectile
-            {
-                PositionX = enemyModel.PositionX,
-                PositionY = enemyModel.PositionY,
-                Firer = ProjectileFirer.ENEMY
-            }; 
+        var projectileModel = new Projectile 
+        { 
+            PositionX = highEnemies.ElementAt(enemyIndex).Model.PositionX, 
+            PositionY = highEnemies.ElementAt(enemyIndex).Model.PositionY, 
+            Firer = ProjectileFirer.ENEMY 
             
-            
-            ProjectileFired?.Invoke(this, projectileModel); 
-        }
-
+        };
+        ProjectileFired?.Invoke(this, projectileModel); 
+        
     }
 }
