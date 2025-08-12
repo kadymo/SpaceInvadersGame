@@ -11,16 +11,5 @@ public class Player : IPositionable
     public double Speed { get; set; } = 200;
     
     public int Lifes { get; set; } = 3;
-    
-    public event Action OnPlayerDied;
-
-    public void TakeDamage(int amount)
-    {
-        Health -= amount;
-        if (Health <= 0)
-        {
-            Console.WriteLine("Player Died!");
-            OnPlayerDied?.Invoke();
-        }
-    }
+    public int Score { get; set; } = 0;
 }

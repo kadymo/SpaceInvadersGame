@@ -13,24 +13,20 @@ public class GameManager
     private readonly SoundManager _soundManager;
     
     private DispatcherTimer _enemyProjectileTimer;
+    private DateTime _lastUpdate;
 
     private bool _canShoot = true;
     public bool CanShoot => _canShoot;
     
-    private DateTime _lastUpdate;
     private bool _isGameRunning;
     public bool IsGameRunning => _isGameRunning;
     
     private IEnumerable<PlayerGameObject> GetPlayers() => _gameObjects.OfType<PlayerGameObject>();
     private IEnumerable<EnemyGameObject> GetEnemies() => _gameObjects.OfType<EnemyGameObject>();
-        
     private IEnumerable<ProjectileGameObject> GetProjectiles() => _gameObjects.OfType<ProjectileGameObject>();
     private IEnumerable<ProjectileGameObject> GetPlayerProjectiles() => GetProjectiles().Where(p => p.Model.Firer == ProjectileFirer.PLAYER);
     private IEnumerable<ProjectileGameObject> GetEnemyProjectiles() => GetProjectiles().Where(p => p.Model.Firer == ProjectileFirer.ENEMY);
-        
     private IEnumerable<ObstacleGameObject> GetObstacles() => _gameObjects.OfType<ObstacleGameObject>();
-    
-    public int Score { get; set; }
     
     public event EventHandler<Projectile> ProjectileFired;
     public event EventHandler<ProjectileGameObject> ProjectileExceededScreen;
@@ -40,6 +36,8 @@ public class GameManager
     public event EventHandler<GameOverEventArgs> GameOver;
 
     private double _swarmDirection = 1.0f;
+    
+    public int Score => GetPlayers().ToList().First().Model.Score;
     
     public GameManager(List<GameObject> gameObjects, InputManager inputManager, SoundManager soundManager)
     {
@@ -60,16 +58,17 @@ public class GameManager
 
         this.ProjectileHitEnemy += (sender, collisionData) =>
         {
+            var player = GetPlayers().ToList().First();
             switch (collisionData.EnemyTarget.Model.Type) 
             { 
                 case EnemyType.LOW: 
-                    Score += 10; 
+                    player.Model.Score += 10; 
                     break;
                 case EnemyType.MEDIUM: 
-                    Score += 20; 
+                    player.Model.Score += 20; 
                     break;
                 case EnemyType.HIGH: 
-                    Score += 40; 
+                    player.Model.Score += 40; 
                     break; 
                 }
             
