@@ -1,6 +1,8 @@
-﻿namespace SpaceInvadersGame.Models;
+﻿using SpaceInvadersGame.Models.Interfaces;
 
-public class Obstacle
+namespace SpaceInvadersGame.Models;
+
+public class Obstacle : IPositionable
 {
     public double PositionX { get; set; }
     public double PositionY { get; set; }

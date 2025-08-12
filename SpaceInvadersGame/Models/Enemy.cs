@@ -1,8 +1,9 @@
 ﻿using SpaceInvadersGame.Models.Enums;
+using SpaceInvadersGame.Models.Interfaces;
 
 namespace SpaceInvadersGame.Models;
 
-public class Enemy
+public class Enemy : IPositionable
 {
     public double PositionX { get; set; } = 0;
     public double PositionY { get; set; }

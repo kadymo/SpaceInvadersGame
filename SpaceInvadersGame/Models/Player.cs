@@ -1,7 +1,9 @@
-﻿namespace SpaceInvadersGame.Models;
+﻿using SpaceInvadersGame.Models.Interfaces;
+
+namespace SpaceInvadersGame.Models;
 
 
-public class Player
+public class Player : IPositionable
 {
     public double PositionX { get; set; } = 300;
     public double PositionY { get; set; } = 450;
