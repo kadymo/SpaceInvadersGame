@@ -34,7 +34,7 @@ public class GameManager
     
     public event EventHandler<Projectile> ProjectileFired;
     public event EventHandler<ProjectileGameObject> ProjectileExceededScreen;
-    public event EventHandler<CollisionEventArgs> ProjectileHit;
+    public event EventHandler<CollisionEventArgs> ProjectileHitEnemy;
     public event EventHandler<CollisionEventArgs> ProjectileHitPlayer;
     public event EventHandler<CollisionEventArgs> ObstacleHit;
 
@@ -57,7 +57,7 @@ public class GameManager
             _canShoot = true;
         };
 
-        this.ProjectileHit += (sender, collisionData) =>
+        this.ProjectileHitEnemy += (sender, collisionData) =>
         {
             switch (collisionData.EnemyTarget.Model.Type) 
             { 
@@ -123,9 +123,6 @@ public class GameManager
         if (!_isGameRunning) return;
         float deltaTimeSeconds = (float)deltaTime.TotalSeconds;
         
-        // Fires
-        FirePlayerProjectile();
-        
         // Movement
         MovementPlayer(deltaTimeSeconds);
         MovementPlayerProjectile(deltaTimeSeconds);
@@ -137,6 +134,9 @@ public class GameManager
         VerifyEnemiesCollision();
         VerifyPlayerCollision();
         VerifyObstacleCollision();
+        
+        // Fires
+        FirePlayerProjectile();
     }
 
     private void VerifyEnemiesCollision()
@@ -151,7 +151,7 @@ public class GameManager
                 if (CheckCollision(projectile, enemy))
                 {
                     var collisionData = new CollisionEventArgs(projectile, enemy);
-                    ProjectileHit?.Invoke(this, collisionData);
+                    ProjectileHitEnemy?.Invoke(this, collisionData);
                     break;
                 }            
             }
@@ -205,31 +205,6 @@ public class GameManager
             }
         }
     }
-    //
-    //
-    // private void CheckProjectileObstacleCollision(ProjectileGameObject projectile, ObstacleGameObject obstacle, bool isPlayerProjectile)
-    // {
-    //     bool heightCollisionCondition; 
-    //     if (isPlayerProjectile) 
-    //     { 
-    //         heightCollisionCondition = projectile.Model.PositionY <= obstacle.Model.PositionY + obstacle.View.Height && 
-    //                                    projectile.Model.PositionY + projectile.View.Height >= obstacle.Model.PositionY;
-    //     }
-    //     else 
-    //     { 
-    //         heightCollisionCondition = projectile.Model.PositionY + projectile.View.Height >= obstacle.Model.PositionY && 
-    //                                    projectile.Model.PositionY <= obstacle.Model.PositionY + obstacle.View.Height;
-    //     }
-    //         
-    //     bool widthCollisionCondition = projectile.Model.PositionX + projectile.View.Width > obstacle.Model.PositionX && 
-    //                                    projectile.Model.PositionX < obstacle.Model.PositionX + obstacle.View.Width;
-    //
-    //     if (heightCollisionCondition && widthCollisionCondition) 
-    //     { 
-    //         var collisionData = new CollisionEventArgs(projectile, obstacle); 
-    //         ObstacleHit?.Invoke(this, collisionData); 
-    //     }
-    // }
 
     private bool CheckCollision(ProjectileGameObject projectile, GameObject target)
     {

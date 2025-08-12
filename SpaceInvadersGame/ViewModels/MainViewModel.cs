@@ -30,7 +30,7 @@ public partial class MainViewModel : ObservableObject
         _gameManager = new GameManager(_gameObjects, _inputManager, _soundManager);
         
         _gameManager.ProjectileFired += OnProjectileFired;
-        _gameManager.ProjectileHit += OnProjectileHit;
+        _gameManager.ProjectileHitEnemy += OnProjectileHitEnemy;
         _gameManager.ProjectileHitPlayer += OnProjectileHitPlayer;
         _gameManager.ProjectileExceededScreen += OnProjectileExeededScreen;
         _gameManager.ObstacleHit += OnObstacleHit;
@@ -79,7 +79,7 @@ public partial class MainViewModel : ObservableObject
     
     private void OnProjectileFired(object? sender, Projectile projectileModel) => CreateProjectile(projectileModel);
     
-    private async void OnProjectileHit(object? sender, CollisionEventArgs collisionData)
+    private async void OnProjectileHitEnemy(object? sender, CollisionEventArgs collisionData)
     {
         Score = "SCORE: " + _gameManager.Score;
         
