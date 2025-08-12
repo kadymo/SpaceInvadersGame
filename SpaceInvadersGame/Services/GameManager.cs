@@ -1,7 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Windows.Foundation;
+﻿using Windows.Foundation;
 using Windows.System;
-using Microsoft.UI.Xaml.Media.Imaging;
 using SpaceInvadersGame.Models;
 using SpaceInvadersGame.Models.Enums;
 
@@ -18,6 +16,8 @@ public class GameManager
     private DispatcherTimer _enemyProjectileTimer;
 
     private bool _canShoot = true;
+    public bool CanShoot => _canShoot;
+    
     private DateTime _lastUpdate;
     private bool _isGameRunning;
     
@@ -148,12 +148,7 @@ public class GameManager
         {
             foreach (var enemy in enemies)
             {
-                var heightCollisionCondition = projectile.Model.PositionY + 10 < enemy.Model.PositionY + enemy.View.Height;
-              
-                var widthCollisionCondition = projectile.Model.PositionX + projectile.View.Width - 20 > enemy.Model.PositionX 
-                                              && projectile.Model.PositionX - 10 < enemy.Model.PositionX + enemy.View.Width;
-
-                if (heightCollisionCondition && widthCollisionCondition)
+                if (CheckCollision(projectile, enemy))
                 {
                     var collisionData = new CollisionEventArgs(projectile, enemy);
                     ProjectileHit?.Invoke(this, collisionData);
@@ -170,14 +165,11 @@ public class GameManager
 
         foreach (var projectile in enemyProjectiles)
         {
-            var heightCollisionCondition = projectile.Model.PositionY + projectile.View.Height > player.Model.PositionY; 
-            var widthCollisionCondition = projectile.Model.PositionX + projectile.View.Width - 20 > player.Model.PositionX 
-                                          && projectile.Model.PositionX - 10 < player.Model.PositionX + player.View.Width;
-
-            if (heightCollisionCondition && widthCollisionCondition) 
+            if (CheckCollision(projectile, player)) 
             { 
                 var collisionData = new CollisionEventArgs(projectile, player); 
                 ProjectileHitPlayer?.Invoke(this, collisionData);
+                break;
             }   
         }
     }
@@ -189,39 +181,64 @@ public class GameManager
         var playerProjectiles = GetPlayerProjectiles().ToList();
         foreach (var projectile in playerProjectiles)
         {
-            foreach (var obstacle in obstacles) CheckProjectileObstacleCollision(projectile, obstacle, true);
-        }
+            foreach (var obstacle in obstacles)
+            {
+                if (CheckCollision(projectile, obstacle))
+                {
+                    var collisionData = new CollisionEventArgs(projectile, obstacle); 
+                    ObstacleHit?.Invoke(this, collisionData);
+                    break;
+                }
+            }        }
         
         var enemyProjectiles = GetEnemyProjectiles().ToList();
         foreach (var projectile in enemyProjectiles)
         {
-            foreach (var obstacle in obstacles) CheckProjectileObstacleCollision(projectile, obstacle, false);
+            foreach (var obstacle in obstacles)
+            {
+                if (CheckCollision(projectile, obstacle))
+                {
+                    var collisionData = new CollisionEventArgs(projectile, obstacle); 
+                    ObstacleHit?.Invoke(this, collisionData);
+                    break;
+                }
+            }
         }
     }
+    //
+    //
+    // private void CheckProjectileObstacleCollision(ProjectileGameObject projectile, ObstacleGameObject obstacle, bool isPlayerProjectile)
+    // {
+    //     bool heightCollisionCondition; 
+    //     if (isPlayerProjectile) 
+    //     { 
+    //         heightCollisionCondition = projectile.Model.PositionY <= obstacle.Model.PositionY + obstacle.View.Height && 
+    //                                    projectile.Model.PositionY + projectile.View.Height >= obstacle.Model.PositionY;
+    //     }
+    //     else 
+    //     { 
+    //         heightCollisionCondition = projectile.Model.PositionY + projectile.View.Height >= obstacle.Model.PositionY && 
+    //                                    projectile.Model.PositionY <= obstacle.Model.PositionY + obstacle.View.Height;
+    //     }
+    //         
+    //     bool widthCollisionCondition = projectile.Model.PositionX + projectile.View.Width > obstacle.Model.PositionX && 
+    //                                    projectile.Model.PositionX < obstacle.Model.PositionX + obstacle.View.Width;
+    //
+    //     if (heightCollisionCondition && widthCollisionCondition) 
+    //     { 
+    //         var collisionData = new CollisionEventArgs(projectile, obstacle); 
+    //         ObstacleHit?.Invoke(this, collisionData); 
+    //     }
+    // }
 
-    
-    private void CheckProjectileObstacleCollision(ProjectileGameObject projectile, ObstacleGameObject obstacle, bool isPlayerProjectile)
+    private bool CheckCollision(ProjectileGameObject projectile, GameObject target)
     {
-        bool heightCollisionCondition; 
-        if (isPlayerProjectile) 
-        { 
-            heightCollisionCondition = projectile.Model.PositionY <= obstacle.Model.PositionY + obstacle.View.Height && 
-                                       projectile.Model.PositionY + projectile.View.Height >= obstacle.Model.PositionY;
-        }
-        else 
-        { 
-            heightCollisionCondition = projectile.Model.PositionY + projectile.View.Height >= obstacle.Model.PositionY && 
-                                       projectile.Model.PositionY <= obstacle.Model.PositionY + obstacle.View.Height;
-        }
-            
-        bool widthCollisionCondition = projectile.Model.PositionX + projectile.View.Width > obstacle.Model.PositionX && 
-                                       projectile.Model.PositionX < obstacle.Model.PositionX + obstacle.View.Width;
-
-        if (heightCollisionCondition && widthCollisionCondition) 
-        { 
-            var collisionData = new CollisionEventArgs(projectile, obstacle); 
-            ObstacleHit?.Invoke(this, collisionData); 
-        }
+        var projectileBounds = GetObjectBounds(projectile);
+        var targetBounds = GetObjectBounds(target);
+        
+        projectileBounds.Intersect(targetBounds);
+        
+        return !projectileBounds.IsEmpty;
     }
     
     private Rect GetObjectBounds(GameObject gameObject)
@@ -246,9 +263,10 @@ public class GameManager
                 y = obstacle.Model.PositionY;
                 break;
         }
-        return new Rect(x, y, gameObject.View.Width, gameObject.View.Height);
-    }
 
+        return new Rect(x, y, gameObject.View.Width, gameObject.View.Height);
+
+    }
 
 
     private void MovementPlayer(float deltaTimeSeconds)
@@ -330,6 +348,7 @@ public class GameManager
         
         if (_inputManager.isKeyPressed(VirtualKey.Space) && _canShoot)
         {
+            if (!_canShoot) return;
             _canShoot = false;
             
             var projectileModel = new Projectile
