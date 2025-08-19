@@ -5,4 +5,5 @@ public enum EnemyType
     LOW,
     MEDIUM,
     HIGH,
+    SPECIAL
 }
