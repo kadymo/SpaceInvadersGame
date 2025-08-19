@@ -37,6 +37,8 @@ public partial class MainViewModel : ObservableObject
         _gameManager.ProjectileHitPlayer += OnProjectileHitPlayer;
         _gameManager.ProjectileExceededScreen += OnProjectileExeededScreen;
         _gameManager.ObstacleHit += OnObstacleHit;
+        _gameManager.SpecialEnemyGenerated += OnSpecialEnemyGenerated;
+        _gameManager.SpecialEnemyDestroyed += OnSpecialEnemyDestroyed;
         _gameManager.WaveEnd += OnWaveEnd;
         _gameManager.GameOver += OnGameOver;
     }
@@ -139,7 +141,6 @@ public partial class MainViewModel : ObservableObject
             PlayerRemoved?.Invoke(this, player);
         }
 
-
         var explosionLeft = Canvas.GetLeft(player.View);
         var explosionTop = Canvas.GetTop(player.View);
         
@@ -182,6 +183,54 @@ public partial class MainViewModel : ObservableObject
         ProjectileRemoved?.Invoke(this, projectile);
         
         obstacle.View.Opacity = (obstacle.Model.Health / 100);
+    }
+
+    private void OnSpecialEnemyGenerated()
+    {
+        var enemyModel = new Enemy
+        {
+            PositionX = 800,
+            PositionY = 10,
+            Type = EnemyType.SPECIAL,
+            Speed = 50
+        };
+        
+        Image enemyImage = new Image
+        {
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/SpecialEnemy.png")),
+            Width = 45,
+            Height = 45,
+        };
+        
+        EnemyGameObject enemy = new EnemyGameObject(enemyImage, enemyModel);
+                
+        _gameObjects.Add(enemy); 
+        _gameManager.AddGameObject(enemy);
+        
+        EnemyCreated.Invoke(this, enemy);
+    }
+
+    private async void OnSpecialEnemyDestroyed(object? sender, EnemyGameObject enemy)
+    {
+        _gameObjects.Remove(enemy);
+        EnemyRemoved?.Invoke(this, enemy);
+        
+        var explosionLeft = Canvas.GetLeft(enemy.View);
+        var explosionTop = Canvas.GetTop(enemy.View);
+        
+        Image explosionImage = new Image
+        {
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Explosion.gif")),
+            Width = 45,
+            Height = 45,
+        };
+
+        Canvas.SetLeft(explosionImage, explosionLeft);
+        Canvas.SetTop(explosionImage, explosionTop);
+
+        ExplosionEffectCreated(this, explosionImage);
+        await Task.Delay(500);
+        ExplosionEffectRemoved(this, explosionImage);
     }
 
     private void OnWaveEnd()
