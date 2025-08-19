@@ -16,6 +16,9 @@ public partial class MainViewModel : ObservableObject
     
     [ObservableProperty]
     private string _score;
+    
+    [ObservableProperty]
+    private string _wave;
 
     [ObservableProperty]
     private string _username;
@@ -34,6 +37,7 @@ public partial class MainViewModel : ObservableObject
         _gameManager.ProjectileHitPlayer += OnProjectileHitPlayer;
         _gameManager.ProjectileExceededScreen += OnProjectileExeededScreen;
         _gameManager.ObstacleHit += OnObstacleHit;
+        _gameManager.WaveEnd += OnWaveEnd;
         _gameManager.GameOver += OnGameOver;
     }
 
@@ -180,6 +184,12 @@ public partial class MainViewModel : ObservableObject
         obstacle.View.Opacity = (obstacle.Model.Health / 100);
     }
 
+    private void OnWaveEnd()
+    {
+        Wave = "WAVE: " + _gameManager.Wave;
+        CreateEnemy();
+    }
+
     private void OnGameOver(object? sender, GameOverEventArgs e)
     {
         GameOver?.Invoke(this, e);
@@ -198,7 +208,6 @@ public partial class MainViewModel : ObservableObject
         _gameObjects.Add(player);
         _gameManager.AddGameObject(player);
         
-        // var eventData = new ObjectEventArgs(player, playerImage);
         PlayerCreated.Invoke(this, player);
     }
     
@@ -246,7 +255,6 @@ public partial class MainViewModel : ObservableObject
                 _gameObjects.Add(enemy); 
                 _gameManager.AddGameObject(enemy);
                 
-                // var eventData = new ObjectEventArgs(enemyGameObject, enemyImage);
                 EnemyCreated.Invoke(this, enemy);
             }
         }
@@ -290,8 +298,8 @@ public partial class MainViewModel : ObservableObject
         Image projectileImage = new Image
         {
             Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Projectile.gif")),
-            Width = 20,
-            Height = 20,
+            Width = 30,
+            Height = 30,
         };
         
         var rotation = new RotateTransform();
@@ -301,7 +309,7 @@ public partial class MainViewModel : ObservableObject
         
         ProjectileGameObject projectile = new ProjectileGameObject(projectileImage, projectileModel);
         projectile.Rotation = rotation;
-        projectile.Rotation.Angle = 90;
+        projectile.Rotation.Angle = projectileModel.Firer == ProjectileFirer.PLAYER ? 90 : 270;
         
         _gameObjects.Add(projectile);
         _gameManager.AddGameObject(projectile);

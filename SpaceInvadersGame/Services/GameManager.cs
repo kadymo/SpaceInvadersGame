@@ -33,11 +33,14 @@ public class GameManager
     public event EventHandler<CollisionEventArgs> ProjectileHitEnemy;
     public event EventHandler<CollisionEventArgs> ProjectileHitPlayer;
     public event EventHandler<CollisionEventArgs> ObstacleHit;
+    public event Action WaveEnd;
     public event EventHandler<GameOverEventArgs> GameOver;
 
     private double _swarmDirection = 1.0f;
     
     public int Score => GetPlayers().ToList().First().Model.Score;
+    public int Lifes => GetPlayers().ToList().First().Model.Lifes;
+    public int Wave = 1;
     
     public GameManager(List<GameObject> gameObjects, InputManager inputManager, SoundManager soundManager)
     {
@@ -109,7 +112,7 @@ public class GameManager
     private void SetupEnemyProjectileTimer()
     {
         _enemyProjectileTimer = new DispatcherTimer();
-        _enemyProjectileTimer.Interval = TimeSpan.FromSeconds(2);
+        _enemyProjectileTimer.Interval = TimeSpan.FromSeconds(60);
         _enemyProjectileTimer.Tick += ((sender, o) => FireEnemyProjectile());
         _enemyProjectileTimer.Start();
     }
@@ -118,12 +121,12 @@ public class GameManager
     {
         if (Score >= 500)
         {
-            Stop();
+            // Stop();
             
             var eventArgs = new GameOverEventArgs();
             eventArgs.Score = Score;
-            GameOver.Invoke(this, eventArgs);
-            return;
+            // GameOver.Invoke(this, eventArgs);
+            // return;
         }
         
         if (!_isGameRunning) return;
@@ -144,6 +147,11 @@ public class GameManager
         
         // Fires
         FirePlayerProjectile();
+        
+        // Wave End
+        CheckWaveEnd();
+        
+        _lastUpdate = DateTime.Now;
     }
 
     private void VerifyEnemiesCollision()
@@ -196,7 +204,8 @@ public class GameManager
                     ObstacleHit?.Invoke(this, collisionData);
                     break;
                 }
-            }        }
+            }        
+        }
         
         var enemyProjectiles = GetEnemyProjectiles().ToList();
         foreach (var projectile in enemyProjectiles)
@@ -222,10 +231,20 @@ public class GameManager
         
         return !projectileBounds.IsEmpty;
     }
+
+    private void CheckWaveEnd()
+    {
+        var enemies = GetEnemies().ToList();
+        if (enemies.Count == 0)
+        {
+            Wave += 1;
+            WaveEnd.Invoke();
+        }
+    }
     
     private Rect GetObjectBounds(GameObject gameObject)
     {
-        double x = 0, y = 0;
+        double x = 0, y = 0; 
         switch (gameObject)
         {
             case PlayerGameObject player:
@@ -249,8 +268,7 @@ public class GameManager
         return new Rect(x, y, gameObject.View.Width, gameObject.View.Height);
 
     }
-
-
+    
     private void MovementPlayer(float deltaTimeSeconds)
     {
         var player = GetPlayers().ToList().First();
@@ -351,7 +369,7 @@ public class GameManager
         {
             projectile.Model.PositionY += projectile.Model.Speed * deltaTimeSeconds;
             
-            if (projectile.Model.PositionY + projectile.View.Height > bounds.Bottom) 
+            if (projectile.Model.PositionY + projectile.View.Height > bounds.Bottom + 100) 
             { 
                 ProjectileExceededScreen?.Invoke(this, projectile); 
                 _gameObjects.Remove(projectile);

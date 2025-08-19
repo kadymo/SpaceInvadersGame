@@ -41,6 +41,7 @@ public sealed partial class MainPage : Page
         this.KeyUp += OnPageKeyUp;
 
         Score.Text = "SCORE: 0";
+        Wave.Text = "WAVE: 1";
         
         ViewModel.Start();
         
