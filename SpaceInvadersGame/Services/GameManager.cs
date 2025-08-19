@@ -13,6 +13,7 @@ public class GameManager
     private readonly SoundManager _soundManager;
     
     private DispatcherTimer _enemyProjectileTimer;
+    private DispatcherTimer _specialEnemyTimer;
     private DateTime _lastUpdate;
 
     private bool _canShoot = true;
@@ -22,7 +23,8 @@ public class GameManager
     public bool IsGameRunning => _isGameRunning;
     
     private IEnumerable<PlayerGameObject> GetPlayers() => _gameObjects.OfType<PlayerGameObject>();
-    private IEnumerable<EnemyGameObject> GetEnemies() => _gameObjects.OfType<EnemyGameObject>();
+    private IEnumerable<EnemyGameObject> GetEnemies() => _gameObjects.OfType<EnemyGameObject>().Where(e => e.Model.Type != EnemyType.SPECIAL);
+    private IEnumerable<EnemyGameObject> GetSpecialEnemies() => _gameObjects.OfType<EnemyGameObject>().Where(e => e.Model.Type == EnemyType.SPECIAL);
     private IEnumerable<ProjectileGameObject> GetProjectiles() => _gameObjects.OfType<ProjectileGameObject>();
     private IEnumerable<ProjectileGameObject> GetPlayerProjectiles() => GetProjectiles().Where(p => p.Model.Firer == ProjectileFirer.PLAYER);
     private IEnumerable<ProjectileGameObject> GetEnemyProjectiles() => GetProjectiles().Where(p => p.Model.Firer == ProjectileFirer.ENEMY);
@@ -33,6 +35,8 @@ public class GameManager
     public event EventHandler<CollisionEventArgs> ProjectileHitEnemy;
     public event EventHandler<CollisionEventArgs> ProjectileHitPlayer;
     public event EventHandler<CollisionEventArgs> ObstacleHit;
+    public event Action SpecialEnemyGenerated;
+    public event EventHandler<EnemyGameObject> SpecialEnemyDestroyed;
     public event Action WaveEnd;
     public event EventHandler<GameOverEventArgs> GameOver;
 
@@ -50,7 +54,6 @@ public class GameManager
 
         this.ProjectileFired += (sender, projectileModel) =>
         {
-            
             _soundManager.PlaySound("ProjectileFiredSound.wav");
         };
 
@@ -72,7 +75,10 @@ public class GameManager
                     break;
                 case EnemyType.HIGH: 
                     player.Model.Score += 40; 
-                    break; 
+                    break;
+                case EnemyType.SPECIAL:
+                    player.Model.Score += 120;
+                    break;
                 }
             
             _canShoot = true;
@@ -100,35 +106,36 @@ public class GameManager
     {
         _isGameRunning = true;
         _lastUpdate = DateTime.Now;
+        
         SetupEnemyProjectileTimer();
+        SetupSpecialEnemyTimer();
     }
 
     public void Stop()
     {
         _isGameRunning = false;
         _enemyProjectileTimer.Stop();
+        _specialEnemyTimer.Stop();
     }
 
     private void SetupEnemyProjectileTimer()
     {
         _enemyProjectileTimer = new DispatcherTimer();
-        _enemyProjectileTimer.Interval = TimeSpan.FromSeconds(60);
+        _enemyProjectileTimer.Interval = TimeSpan.FromSeconds(1.5);
         _enemyProjectileTimer.Tick += ((sender, o) => FireEnemyProjectile());
         _enemyProjectileTimer.Start();
     }
     
+    private void SetupSpecialEnemyTimer()
+    {
+        _specialEnemyTimer = new DispatcherTimer();
+        _specialEnemyTimer.Interval = TimeSpan.FromSeconds(30);
+        _specialEnemyTimer.Tick += ((sender, o) => GenerateSpecialEnemy());
+        _specialEnemyTimer.Start();
+    }
+    
     public void Update(TimeSpan deltaTime, Rect bounds)
     {
-        if (Score >= 500)
-        {
-            // Stop();
-            
-            var eventArgs = new GameOverEventArgs();
-            eventArgs.Score = Score;
-            // GameOver.Invoke(this, eventArgs);
-            // return;
-        }
-        
         if (!_isGameRunning) return;
         
         float deltaTimeSeconds = (float)deltaTime.TotalSeconds;
@@ -138,10 +145,12 @@ public class GameManager
         MovementPlayerProjectile(deltaTimeSeconds);
         
         MovementEnemies(deltaTimeSeconds, bounds);
+        MovementSpecialEnemies(deltaTimeSeconds, bounds);
         MovementEnemyProjectile(deltaTimeSeconds, bounds);
         
         // Collisions
         VerifyEnemiesCollision();
+        VerifySpecialEnemiesCollision();
         VerifyPlayerCollision();
         VerifyObstacleCollision();
         
@@ -158,6 +167,25 @@ public class GameManager
     {
         var playerProjectiles = GetPlayerProjectiles().ToList();
         var enemies = GetEnemies().ToList();
+
+        foreach (var projectile in playerProjectiles)
+        {
+            foreach (var enemy in enemies)
+            {
+                if (CheckCollision(projectile, enemy))
+                {
+                    var collisionData = new CollisionEventArgs(projectile, enemy);
+                    ProjectileHitEnemy?.Invoke(this, collisionData);
+                    break;
+                }            
+            }
+        }
+    }
+    
+    private void VerifySpecialEnemiesCollision()
+    {
+        var playerProjectiles = GetPlayerProjectiles().ToList();
+        var enemies = GetSpecialEnemies().ToList();
 
         foreach (var projectile in playerProjectiles)
         {
@@ -324,6 +352,25 @@ public class GameManager
         {
             foreach (var enemy in enemies) enemy.Model.PositionY += 1;
         }
+    }
+
+    private void MovementSpecialEnemies(float deltaTimeSeconds, Rect bounds)
+    {
+        var specialEnemies = GetSpecialEnemies().ToList();
+        if (!specialEnemies.Any()) return;   
+        
+        var specialEnemy = specialEnemies.First();
+        specialEnemy.Model.PositionX -= specialEnemy.Model.Speed * deltaTimeSeconds;
+
+        if (specialEnemy.Model.PositionX + 75 < bounds.Left)
+        {
+            SpecialEnemyDestroyed.Invoke(this, specialEnemy);
+        }
+    }
+
+    private void GenerateSpecialEnemy()
+    {
+        SpecialEnemyGenerated.Invoke();
     }
 
     private void MovementPlayerProjectile(float deltaTimeSeconds)
