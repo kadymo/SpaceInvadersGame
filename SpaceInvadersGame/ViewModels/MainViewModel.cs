@@ -134,10 +134,7 @@ public partial class MainViewModel : ObservableObject
         
         player.Model.Lifes -= 1;
         if (player.Model.Lifes <= 0)
-        { 
-            _gameObjects.Remove(player);
-            _gameManager.RemoveGameObject(player);
-
+        {
             PlayerRemoved?.Invoke(this, player);
         }
 

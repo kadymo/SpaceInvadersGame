@@ -452,14 +452,15 @@ public class GameManager
 
     private void CheckGameOver()
     {
-        if (!GetPlayers().ToList().Any()) return;
-        var player = GetPlayers().First();
+        var players = GetPlayers().ToList();
         
-        if (player.Model.Lifes <= 0)
+        if (!players.Any() || players.First().Model.Lifes <= 0)
         {
-            Console.WriteLine("GAME OVER");
-            GameOver.Invoke(this, new GameOverEventArgs { Score = Score });
-            Stop();
+            if (_isGameRunning)
+            {
+                GameOver.Invoke(this, new GameOverEventArgs { Score = Score });
+                Stop();                
+            }
         }
     }
 }
