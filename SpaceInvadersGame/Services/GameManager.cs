@@ -140,6 +140,8 @@ public class GameManager
         
         float deltaTimeSeconds = (float)deltaTime.TotalSeconds;
         
+        CheckGameOver();
+        
         // Movement
         MovementPlayer(deltaTimeSeconds);
         MovementPlayerProjectile(deltaTimeSeconds);
@@ -203,7 +205,9 @@ public class GameManager
 
     private void VerifyPlayerCollision()
     {
+        if (!GetPlayers().ToList().Any()) return;
         var player = GetPlayers().ToList().First();
+        
         var enemyProjectiles = GetEnemyProjectiles().ToList();
 
         foreach (var projectile in enemyProjectiles)
@@ -299,6 +303,7 @@ public class GameManager
     
     private void MovementPlayer(float deltaTimeSeconds)
     {
+        if (!GetPlayers().ToList().Any()) return;
         var player = GetPlayers().ToList().First();
         
         if (_inputManager.isKeyPressed(VirtualKey.W) || _inputManager.isKeyPressed(VirtualKey.Up))
@@ -391,6 +396,7 @@ public class GameManager
 
     private void FirePlayerProjectile()
     {
+        if (!GetPlayers().ToList().Any()) return;
         var player = GetPlayers().ToList().First();
         
         if (_inputManager.isKeyPressed(VirtualKey.Space) && _canShoot)
@@ -442,5 +448,18 @@ public class GameManager
         };
         ProjectileFired?.Invoke(this, projectileModel); 
         
+    }
+
+    private void CheckGameOver()
+    {
+        if (!GetPlayers().ToList().Any()) return;
+        var player = GetPlayers().First();
+        
+        if (player.Model.Lifes <= 0)
+        {
+            Console.WriteLine("GAME OVER");
+            GameOver.Invoke(this, new GameOverEventArgs { Score = Score });
+            Stop();
+        }
     }
 }
