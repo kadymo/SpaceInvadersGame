@@ -175,6 +175,18 @@ public class GameManager
         
         _lastUpdate = DateTime.Now;
     }
+    
+    // Collisions
+    
+    private bool CheckCollision(ProjectileGameObject projectile, GameObject target)
+    {
+        var projectileBounds = GetObjectBounds(projectile);
+        var targetBounds = GetObjectBounds(target);
+        
+        projectileBounds.Intersect(targetBounds);
+        
+        return !projectileBounds.IsEmpty;
+    }
 
     private void VerifyEnemiesCollision()
     {
@@ -265,16 +277,6 @@ public class GameManager
         }
     }
 
-    private bool CheckCollision(ProjectileGameObject projectile, GameObject target)
-    {
-        var projectileBounds = GetObjectBounds(projectile);
-        var targetBounds = GetObjectBounds(target);
-        
-        projectileBounds.Intersect(targetBounds);
-        
-        return !projectileBounds.IsEmpty;
-    }
-
     private void CheckWaveEnd()
     {
         var enemies = GetEnemies().ToList();
@@ -311,6 +313,8 @@ public class GameManager
         return new Rect(x, y, gameObject.View.Width, gameObject.View.Height);
 
     }
+    
+    // Movement
     
     private void MovementPlayer(float deltaTimeSeconds)
     {
@@ -384,11 +388,23 @@ public class GameManager
         }
     }
 
-    private void GenerateSpecialEnemy()
+    private void MovementEnemyProjectile(float deltaTimeSeconds, Rect bounds)
     {
-        SpecialEnemyGenerated.Invoke();
+        var enemyProjectiles = GetEnemyProjectiles().ToList();
+        
+        foreach (var projectile in enemyProjectiles)
+        {
+            projectile.Model.PositionY += projectile.Model.Speed * deltaTimeSeconds;
+            
+            if (projectile.Model.PositionY + projectile.View.Height > bounds.Bottom + 100) 
+            { 
+                ProjectileExceededScreen?.Invoke(this, projectile); 
+                _gameObjects.Remove(projectile);
+            }    
+        }
+        
     }
-
+    
     private void MovementPlayerProjectile(float deltaTimeSeconds)
     {
         var playerProjectiles = GetPlayerProjectiles().ToList();
@@ -404,7 +420,9 @@ public class GameManager
             }   
         }
     }
-
+    
+    // Fires
+    
     private void FirePlayerProjectile()
     {
         if (!GetPlayers().ToList().Any()) return;
@@ -424,24 +442,7 @@ public class GameManager
             ProjectileFired?.Invoke(this, projectileModel);
         }
     }
-
-    private void MovementEnemyProjectile(float deltaTimeSeconds, Rect bounds)
-    {
-        var enemyProjectiles = GetEnemyProjectiles().ToList();
-        
-        foreach (var projectile in enemyProjectiles)
-        {
-            projectile.Model.PositionY += projectile.Model.Speed * deltaTimeSeconds;
-            
-            if (projectile.Model.PositionY + projectile.View.Height > bounds.Bottom + 100) 
-            { 
-                ProjectileExceededScreen?.Invoke(this, projectile); 
-                _gameObjects.Remove(projectile);
-            }    
-        }
-        
-    }
-
+    
     private void FireEnemyProjectile()
     {
         var highEnemies = GetEnemies().Where(x => x.Model.Type == EnemyType.HIGH).ToList();
@@ -459,6 +460,11 @@ public class GameManager
         };
         ProjectileFired?.Invoke(this, projectileModel); 
         
+    }
+    
+    private void GenerateSpecialEnemy()
+    {
+        SpecialEnemyGenerated.Invoke();
     }
 
     private void CheckGameOver()
