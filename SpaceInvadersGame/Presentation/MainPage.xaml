@@ -31,9 +31,9 @@
               </Grid.ColumnDefinitions>
 
               <TextBlock Grid.Column="0" FontSize="30" Margin="40,20,0,0" x:Name="Score" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" />
-              <TextBlock Grid.Column="1" FontSize="30" Margin="40,20,0,0" x:Name="Username" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" />
-              <TextBlock Grid.Column="2" FontSize="30" Margin="40,20,0,0" x:Name="Wave" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Wave, UpdateSourceTrigger=PropertyChanged}" />
-              <TextBlock Grid.Column="3" FontSize="30" Margin="40,20,0,0" x:Name="Lifes" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Lifes, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBlock Grid.Column="1" FontSize="30" Margin="40,20,0,0" x:Name="Wave" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Wave, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBlock Grid.Column="2" FontSize="30" Margin="40,20,0,0" x:Name="Lifes" FontWeight="Bold" Foreground="#007a8e"  Text="{Binding Lifes, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBlock Grid.Column="3" FontSize="30" Margin="40,20,0,0" x:Name="Username" FontWeight="Bold" Foreground="#007a8e"  Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
           </Grid>
 
           <Canvas x:Name="GameCanvas" Margin="50" Grid.Row="1">
