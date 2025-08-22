@@ -37,6 +37,7 @@ public class GameManager
     public event EventHandler<CollisionEventArgs> ObstacleHit;
     public event Action SpecialEnemyGenerated;
     public event EventHandler<EnemyGameObject> SpecialEnemyDestroyed;
+    public event Action LifesIncreased;
     public event Action WaveEnd;
     public event EventHandler<GameOverEventArgs> GameOver;
 
@@ -65,6 +66,8 @@ public class GameManager
         this.ProjectileHitEnemy += (sender, collisionData) =>
         {
             var player = GetPlayers().ToList().First();
+            var previousScore = player.Model.Score;
+            
             switch (collisionData.EnemyTarget.Model.Type) 
             { 
                 case EnemyType.LOW: 
@@ -80,6 +83,14 @@ public class GameManager
                     player.Model.Score += 120;
                     break;
                 }
+
+            var previousScoreDouble = (double)previousScore / 1000;
+            var scoreDouble = (double)player.Model.Score / 1000;
+            
+            if (Math.Floor(scoreDouble) > Math.Floor(previousScoreDouble))
+            {
+                player.Model.Lifes++;
+            }
             
             _canShoot = true;
             _soundManager.PlaySound("ProjectileHitSound.wav");
