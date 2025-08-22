@@ -374,4 +374,17 @@ public partial class MainViewModel : ObservableObject
 
         ProjectileCreated.Invoke(this, projectile);
     }
+
+    public async Task SaveScoreAsync()
+    {
+        try
+        {
+            var storageFolder = ApplicationData.Current.LocalFolder;
+            var fileName = "Score.txt";
+            var scoreFile = await storageFolder.CreateFileAsync(fileName, CreationCollisionOption.OpenIfExists);
+            var scoreLine = $"{_gameManager.Score} - {Username}";
+            
+            await FileIO.AppendTextAsync(scoreFile, scoreLine);
+        } catch(Exception ex) {}
+    }
 }

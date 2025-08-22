@@ -150,6 +150,7 @@ public sealed partial class MainPage : Page
             XamlRoot = this.XamlRoot,
         };
         
+        
         ContentDialogResult result = await gameOverDialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
@@ -157,21 +158,9 @@ public sealed partial class MainPage : Page
             this.Frame.Navigate(typeof(MenuPage));
         }  else if (result == ContentDialogResult.Secondary)
         {
-            await SaveScoreAsync();
+            await ViewModel.SaveScoreAsync();
             ViewModel.Stop();
             this.Frame.Navigate(typeof(MenuPage));
         } 
-    }
-
-    private async Task SaveScoreAsync()
-    {
-        try
-        {
-            var storageFolder = ApplicationData.Current.LocalFolder;
-            var fileName = "Score.txt";
-            var scoreFile = await storageFolder.CreateFileAsync(fileName, CreationCollisionOption.OpenIfExists);
-            var scoreLine = $"{Score} {Username}";
-            await FileIO.AppendTextAsync(scoreFile, scoreLine);
-        } catch(Exception ex) {}
     }
 }
