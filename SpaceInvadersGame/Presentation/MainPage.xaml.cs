@@ -146,6 +146,7 @@ public sealed partial class MainPage : Page
             Title = "Game Over",
             Content = "Score: " + Score,
             PrimaryButtonText = "Menu",
+            SecondaryButtonText = "Salvar pontuação",
             XamlRoot = this.XamlRoot,
         };
         
@@ -154,6 +155,23 @@ public sealed partial class MainPage : Page
         {
             ViewModel.Stop();
             this.Frame.Navigate(typeof(MenuPage));
-        }  
+        }  else if (result == ContentDialogResult.Secondary)
+        {
+            await SaveScoreAsync();
+            ViewModel.Stop();
+            this.Frame.Navigate(typeof(MenuPage));
+        } 
+    }
+
+    private async Task SaveScoreAsync()
+    {
+        try
+        {
+            var storageFolder = ApplicationData.Current.LocalFolder;
+            var fileName = "Score.txt";
+            var scoreFile = await storageFolder.CreateFileAsync(fileName, CreationCollisionOption.OpenIfExists);
+            var scoreLine = $"{Score} {Username}";
+            await FileIO.AppendTextAsync(scoreFile, scoreLine);
+        } catch(Exception ex) {}
     }
 }
