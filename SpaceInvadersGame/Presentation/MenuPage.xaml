@@ -15,7 +15,7 @@
     <ScrollView IsTabStop="True">
         <Grid>
             <Grid.Background>
-                <ImageBrush ImageSource="ms-appx:///Assets/Images/SpaceBackground.jpg"/>
+                <ImageBrush ImageSource="ms-appx:///Assets/Images/SpaceBackground2.png"/>
             </Grid.Background>
 
             <StackPanel HorizontalAlignment="Center" Spacing="100" Margin="100">

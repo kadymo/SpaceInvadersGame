@@ -257,7 +257,7 @@ public partial class MainViewModel : ObservableObject
     {
         Image playerImage = new Image
         {
-            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Corinthians.png")),
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/PlayerShip.gif")),
             Width = 50,
             Height = 50,
         };
@@ -283,9 +283,9 @@ public partial class MainViewModel : ObservableObject
         {
             switch (enemyType)
             {
-                case EnemyType.LOW: return new Uri("ms-appx:///Assets/Images/EnemyLow.png");
-                case EnemyType.MEDIUM: return new Uri("ms-appx:///Assets/Images/EnemyMedium.png");
-                case EnemyType.HIGH: return new Uri("ms-appx:///Assets/Images/EnemyHigh.png");
+                case EnemyType.LOW: return new Uri("ms-appx:///Assets/Images/EnemyLow2.gif");
+                case EnemyType.MEDIUM: return new Uri("ms-appx:///Assets/Images/EnemyMedium2.gif");
+                case EnemyType.HIGH: return new Uri("ms-appx:///Assets/Images/EnemyHigh2.gif");
                 default: return new Uri("ms-appx:///Assets/Images/EnemyLow.png");
             }
         }
@@ -332,8 +332,8 @@ public partial class MainViewModel : ObservableObject
             {
                 Image obstacleImage = new Image
                 {
-                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Obstacle.png")),
-                    Width = 150,
+                    Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Obstacle2.png")),
+                    Width = 65,
                     Height = 45,
                 };
                 
