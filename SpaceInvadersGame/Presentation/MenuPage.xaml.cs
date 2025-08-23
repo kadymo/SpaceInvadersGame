@@ -33,27 +33,45 @@ public sealed partial class MenuPage : Page
         var scoreListLines = await GetScoreAsync();
         var stringBuilder = new StringBuilder();
         
+        ListView listView = new ListView();
         foreach (var line in scoreListLines)
         {
             if (string.IsNullOrWhiteSpace(line)) continue;
-            stringBuilder.Append(line);
-            stringBuilder.Append(Environment.NewLine);
+            listView.Items.Add(line);
         }
+        
+        var orderedItems = listView.Items.OrderByDescending(s =>
+        {
+            if (int.TryParse(s.ToString().Split(" - ").ElementAt(0), out int score))
+            {
+                return score;
+            }
+            else
+            {
+                return 0;
+            }
+        }).ToList();
+        
+        listView.ItemsSource = orderedItems;
         
         ContentDialog scoreRankingDialog = new ContentDialog
         {
             Title = "Score - Ranking",
-            Content = stringBuilder.ToString(),
             SecondaryButtonText = "Resetar",
             CloseButtonText = "Fechar",
             XamlRoot = this.XamlRoot,
+            Content = listView
         };
         
         ContentDialogResult result = await scoreRankingDialog.ShowAsync();
         if (result == ContentDialogResult.Secondary)
         {
             await ClearLocalFolderAsync();
-            scoreRankingDialog.Content = await GetScoreAsync();
+            scoreRankingDialog.Content = new TextBlock
+            {
+                TextWrapping = TextWrapping.Wrap,
+                Text = string.Join(Environment.NewLine, await GetScoreAsync())
+            };
         }
     }
     
@@ -68,7 +86,7 @@ public sealed partial class MenuPage : Page
             var lines = await FileIO.ReadLinesAsync(scoreFile);
             return lines;
         } catch(Exception ex) {}
-
+    
         return new List<string>();
     }
     
