@@ -1,4 +1,5 @@
 using Windows.Foundation;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Input;
 using SpaceInvadersGame.Models;
 using SpaceInvadersGame.Presentation;
@@ -134,22 +135,21 @@ public sealed partial class MainPage : Page
     }
     
     // Modal
-    private void OnGameOver(object sender, GameOverEventArgs e)
+    private async void OnGameOver(object sender, GameOverEventArgs e)
     {
-        ShowGameOverDialog(e.Score);
+        ShowGameOverDialog();
     }
 
-    private async void ShowGameOverDialog(int Score)
+    private async void ShowGameOverDialog()
     {
         ContentDialog gameOverDialog = new ContentDialog
         {
             Title = "Game Over",
-            Content = "Score: " + Score,
+            Content = Score.Text,
             PrimaryButtonText = "Menu",
             SecondaryButtonText = "Salvar pontuação",
             XamlRoot = this.XamlRoot,
         };
-        
         
         ContentDialogResult result = await gameOverDialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
