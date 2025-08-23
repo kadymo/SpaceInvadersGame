@@ -355,9 +355,9 @@ public partial class MainViewModel : ObservableObject
         
         Image projectileImage = new Image
         {
-            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Projectile.gif")),
-            Width = 30,
-            Height = 30,
+            Source = projectileModel.Firer == ProjectileFirer.PLAYER ? new BitmapImage(new Uri($"ms-appx:///Assets/Images/Projectile4.gif")) : new BitmapImage(new Uri($"ms-appx:///Assets/Images/Projectile2.gif")) ,
+            Width = 35,
+            Height = 40,
         };
         
         var rotation = new RotateTransform();
@@ -383,8 +383,11 @@ public partial class MainViewModel : ObservableObject
             var fileName = "Score.txt";
             var scoreFile = await storageFolder.CreateFileAsync(fileName, CreationCollisionOption.OpenIfExists);
             var scoreLine = $"{_gameManager.Score} - {Username}";
+
+            List<string> scoreList = new List<string>();
+            scoreList.Add(scoreLine);
             
-            await FileIO.AppendTextAsync(scoreFile, scoreLine);
+            await FileIO.AppendLinesAsync(scoreFile, scoreList);
         } catch(Exception ex) {}
     }
 }
