@@ -14,7 +14,7 @@
     <ScrollViewer IsTabStop="True">
       <Grid>
           <Grid.Background>
-              <ImageBrush ImageSource="ms-appx:///Assets/Images/SpaceBackground.jpg"></ImageBrush>
+              <ImageBrush ImageSource="ms-appx:///Assets/Images/SpaceBackground2.png"></ImageBrush>
           </Grid.Background>
 
           <Grid.RowDefinitions>
@@ -22,7 +22,7 @@
               <RowDefinition/>
           </Grid.RowDefinitions>
 
-          <Grid ColumnSpacing="10" Background="#000">
+          <Grid ColumnSpacing="10" >
               <Grid.ColumnDefinitions>
                   <ColumnDefinition />
                   <ColumnDefinition />
@@ -37,8 +37,10 @@
           </Grid>
 
           <Canvas x:Name="GameCanvas" Margin="50" Grid.Row="1">
-              <!-- <Canvas x:Name="EnemiesCanvas"/> -->
+
           </Canvas>
+
+
       </Grid>
   </ScrollViewer>
 </Page>
