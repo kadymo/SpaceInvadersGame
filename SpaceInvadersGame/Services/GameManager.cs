@@ -354,7 +354,11 @@ public class GameManager
         if (maxX > bounds.Right)
         {
             double correction = maxX - bounds.Right;
-            foreach (var enemy in enemies) enemy.Model.PositionX -= correction;
+            foreach (var enemy in enemies)
+            {
+                enemy.Model.PositionX -= correction;
+                enemy.Model.Speed += 1;
+            }
             
             _swarmDirection = -1.0f;
             hitEdge = true;
@@ -362,7 +366,11 @@ public class GameManager
         else if (minX < bounds.Left)
         {
             double correction = bounds.Left - minX;
-            foreach (var enemy in enemies) enemy.Model.PositionX += correction;
+            foreach (var enemy in enemies)
+            {
+                enemy.Model.PositionX += correction;
+                enemy.Model.Speed += 1;
+            }
             
             _swarmDirection = 1.0f;
             hitEdge = true;
