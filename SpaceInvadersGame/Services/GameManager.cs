@@ -87,7 +87,7 @@ public class GameManager
             var previousScoreDouble = (double)previousScore / 1000;
             var scoreDouble = (double)player.Model.Score / 1000;
             
-            if (Math.Floor(scoreDouble) > Math.Floor(previousScoreDouble))
+            if (Math.Floor(scoreDouble) > Math.Floor(previousScoreDouble) && player.Model.Lifes < 6)
             {
                 player.Model.Lifes++;
             }
