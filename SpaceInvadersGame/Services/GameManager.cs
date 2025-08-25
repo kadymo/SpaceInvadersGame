@@ -15,9 +15,6 @@ public class GameManager
     private DispatcherTimer _enemyProjectileTimer;
     private DispatcherTimer _specialEnemyTimer;
     private DateTime _lastUpdate;
-
-    private bool _canShoot = true;
-    public bool CanShoot => _canShoot;
     
     private bool _isGameRunning;
     public bool IsGameRunning => _isGameRunning;
@@ -58,11 +55,6 @@ public class GameManager
             if (projectileModel.Firer == ProjectileFirer.PLAYER) _soundManager.PlaySound("ProjectileFiredSound.wav");
         };
 
-        this.ProjectileExceededScreen += (sender, gameObject) =>
-        {
-            _canShoot = true;
-        };
-
         this.ProjectileHitEnemy += (sender, collisionData) =>
         {
             var player = GetPlayers().ToList().First();
@@ -92,13 +84,11 @@ public class GameManager
                 player.Model.Lifes++;
             }
             
-            _canShoot = true;
             _soundManager.PlaySound("ProjectileHitSound.wav");
         };
         
         this.ObstacleHit += (sender, collisionData) =>
         {
-            _canShoot = true;
             _soundManager.PlaySound("ObstacleHitSound.wav");
         };
     }
@@ -428,11 +418,10 @@ public class GameManager
         if (!GetPlayers().ToList().Any()) return;
         var player = GetPlayers().ToList().First();
         
-        if (_inputManager.isKeyPressed(VirtualKey.Space) && _canShoot)
+        var activePlayerProjectiles = GetPlayerProjectiles().ToList();
+        
+        if (_inputManager.isKeyPressed(VirtualKey.Space) && !activePlayerProjectiles.Any())
         {
-            if (!_canShoot) return;
-            _canShoot = false;
-            
             var projectileModel = new Projectile
             {
                 PositionX = player.Model.PositionX,
