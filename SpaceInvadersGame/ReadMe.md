@@ -215,16 +215,16 @@ O jogo foi arquitetado seguindo o Padrão MVVM (Main-View-ViewModel), prezando p
   - Possui um método ``Update()`` que é chamado a cada frame do jogo para executar as lógicas necessárias
 
 <figure>
-    <img width="7954"  alt="image"  src="https://github-production-user-asset-6210df.s3.amazonaws.com/98963793/481420275-83381f65-0142-4bac-ac44-123bf8af3099.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250824%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250824T235413Z&X-Amz-Expires=300&X-Amz-Signature=9d89e372250c61d860040fe4f51446df93d62669f42450f9e534685b79c03117&X-Amz-SignedHeaders=host" />
-    <figcaption><a href="https://github-production-user-asset-6210df.s3.amazonaws.com/98963793/481420275-83381f65-0142-4bac-ac44-123bf8af3099.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250824%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250824T235413Z&X-Amz-Expires=300&X-Amz-Signature=9d89e372250c61d860040fe4f51446df93d62669f42450f9e534685b79c03117&X-Amz-SignedHeaders=host">Link da Imagem</a></figcaption>
+    <img width="7954"  alt="image"  src="https://res.cloudinary.com/dcxlgeobi/image/upload/ulylp4oi1spb1cyvmq2d.svg" />
+    <figcaption><a href="https://res.cloudinary.com/dcxlgeobi/image/upload/ulylp4oi1spb1cyvmq2d.svg">Link da Imagem</a></figcaption>
 </figure>
 
 # 🔄️ Fluxo do Jogo
 
 <figure>
-    <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/98963793/481425239-daa38736-7eff-4f53-8fd8-b026535093fa.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250825%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250825T005049Z&X-Amz-Expires=300&X-Amz-Signature=4ad9c5106d5776bbb8727c1aab1589801da5d34106dfc3f3416e21e9e32c5ce9&X-Amz-SignedHeaders=host">
+    <img src="https://res.cloudinary.com/dcxlgeobi/image/upload/yoqlztdl2fb06bibtsgt.svg">
     <figcaption>
-        <a href="https://github-production-user-asset-6210df.s3.amazonaws.com/98963793/481425239-daa38736-7eff-4f53-8fd8-b026535093fa.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250825%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250825T005049Z&X-Amz-Expires=300&X-Amz-Signature=4ad9c5106d5776bbb8727c1aab1589801da5d34106dfc3f3416e21e9e32c5ce9&X-Amz-SignedHeaders=host">Link da imagem do diagrama</a>
+        <a href="https://res.cloudinary.com/dcxlgeobi/image/upload/yoqlztdl2fb06bibtsgt.svg">Link da imagem do diagrama</a>
     </figcaption>
 </figure>
 
@@ -240,13 +240,13 @@ O jogo foi arquitetado seguindo o Padrão MVVM (Main-View-ViewModel), prezando p
 
 ## Tela Inicial
 
-<img src="https://github-production-user-asset-6210df.s3.amazonaws.com/98963793/481422763-5d625799-afc2-4a06-9a31-6f2178848042.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250825%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250825T002555Z&X-Amz-Expires=300&X-Amz-Signature=a80ba9ced32f609f552c1030c5695021dd6ab2ee6526f33233dc40b03f298484&X-Amz-SignedHeaders=host">
+<img src="https://res.cloudinary.com/dcxlgeobi/image/upload/lfaa4ufbjqn0gubukrfx.png">
 
 ## Tela de Placares
-<img src="https://github-production-user-asset-6210df.s3.amazonaws.com/98963793/481422629-729c4964-6194-4e47-97a5-424d2708d8fd.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250825%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250825T002427Z&X-Amz-Expires=300&X-Amz-Signature=31fadf66a213790b368913197b8d78929e669ea79dacb491bf7355b2345e62aa&X-Amz-SignedHeaders=host">
+<img src="https://res.cloudinary.com/dcxlgeobi/image/upload/cu8rr8xqofn4y3l5mivs.png">
 
 ## Tela de Jogo
-<img src="https://github-production-user-asset-6210df.s3.amazonaws.com/98963793/481423028-1ac1dfe8-3276-49c1-a099-69aa277d645c.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250825%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250825T002844Z&X-Amz-Expires=300&X-Amz-Signature=6014fb0568b0bdcc1abbfd1527b7d01a7c9cfe5577fa7cf03403299f9d678a70&X-Amz-SignedHeaders=host">
+<img src="https://res.cloudinary.com/dcxlgeobi/image/upload/fit2gdn0l4urd4zw4xuy.png">
 
 ## Tela de Game Over
-<img src="https://github-production-user-asset-6210df.s3.amazonaws.com/98963793/481423185-33f6bd08-851a-466a-a093-284f93f3fc11.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250825%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250825T003024Z&X-Amz-Expires=300&X-Amz-Signature=c9a75de10f67b14328bbd413a6e32edbada8316a4606ce17913dcc93b3020396&X-Amz-SignedHeaders=host">
+<img src="https://res.cloudinary.com/dcxlgeobi/image/upload/coa1iyxxvdf0wcosg9g4.png">
