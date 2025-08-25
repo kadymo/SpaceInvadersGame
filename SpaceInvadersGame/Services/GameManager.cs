@@ -362,6 +362,13 @@ public class GameManager
         {
             foreach (var enemy in enemies) enemy.Model.PositionY += 1;
         }
+        
+        var enemiesHitPlayer = enemies.Where(e => e.Model.PositionY > 400).ToList();
+        if (enemiesHitPlayer.Any())
+        {
+            GameOver.Invoke(this, new GameOverEventArgs { Score = Score });
+            Stop();
+        }
     }
 
     private void MovementSpecialEnemies(float deltaTimeSeconds, Rect bounds)
