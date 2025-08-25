@@ -89,7 +89,7 @@ public class GameManager
         
         this.ObstacleHit += (sender, collisionData) =>
         {
-            _soundManager.PlaySound("ObstacleHitSound.wav");
+            if (collisionData.Projectile.Model.Firer == ProjectileFirer.PLAYER) _soundManager.PlaySound("ObstacleHitSound.wav");
         };
     }
 
