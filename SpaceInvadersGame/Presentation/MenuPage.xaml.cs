@@ -27,11 +27,28 @@ public sealed partial class MenuPage : Page
     {
         this.Frame.Navigate(typeof(MainPage), UsernameTextbox);
     }
+
+    private async void ShowGameControls(object sender, RoutedEventArgs e)
+    {
+        ListView listView = new ListView();
+        listView.Items.Add("A / ⇦ - Movimentar para a esquerda");
+        listView.Items.Add("D / ⇨ - Movimentar para a direita");
+        listView.Items.Add("Space - Atirar");
+        
+        ContentDialog scoreRankingDialog = new ContentDialog
+        {
+            Title = "Controles",
+            CloseButtonText = "Fechar",
+            XamlRoot = this.XamlRoot,
+            Content = listView
+        };
+        
+        await scoreRankingDialog.ShowAsync();
+    } 
     
     private async void ShowScoreRankingDialog(object sender, RoutedEventArgs e)
     {
         var scoreListLines = await GetScoreAsync();
-        var stringBuilder = new StringBuilder();
         
         ListView listView = new ListView();
         foreach (var line in scoreListLines)

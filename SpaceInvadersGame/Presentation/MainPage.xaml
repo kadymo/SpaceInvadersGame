@@ -36,11 +36,7 @@
               <TextBlock Grid.Column="3" FontSize="30" Margin="40,20,0,0" x:Name="Username" FontWeight="Bold" Foreground="#007a8e"  Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
           </Grid>
 
-          <Canvas x:Name="GameCanvas" Margin="50" Grid.Row="1">
-
-          </Canvas>
-
-
+          <Canvas x:Name="GameCanvas" Margin="50" Grid.Row="1"/>
       </Grid>
   </ScrollViewer>
 </Page>

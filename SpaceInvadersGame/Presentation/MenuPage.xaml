@@ -15,28 +15,54 @@
     <ScrollView IsTabStop="True">
         <Grid>
             <Grid.Background>
-                <ImageBrush ImageSource="ms-appx:///Assets/Images/SpaceBackground2.png"/>
+                <ImageBrush ImageSource="ms-appx:///Assets/Images/SpaceBackground2.png"  />
             </Grid.Background>
 
-            <StackPanel HorizontalAlignment="Center" Spacing="100" Margin="100">
+            <StackPanel HorizontalAlignment="Center" Spacing="80" Margin="100">
                 <Image Source="/Assets/Images/GameLogo.png" Width="300"/>
                 <StackPanel Spacing="50">
                     <StackPanel Spacing="10">
-                        <TextBox x:Name="UsernameTextbox" Width="180" Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="username" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8"/>
-                        <Button Click="StartGameButton_Click" IsEnabled="{x:Bind ViewModel.IsStartButtonEnabled, Mode=OneWay}" Width="180" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8" >Start Game</Button>
-                    </StackPanel>
-                    <Button Click="ShowScoreRankingDialog" Width="180" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8">
-                        <StackPanel Orientation="Horizontal">
-                            <Image Source="ms-appx:///Assets/Icons/RankingIcon.png"
-                                   Width="25"
-                                   Height="25"
-                                   VerticalAlignment="Center"/>
+                        <TextBox x:Name="UsernameTextbox" Width="190" Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="username" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8"/>
+                        <Button Click="StartGameButton_Click" IsEnabled="{x:Bind ViewModel.IsStartButtonEnabled, Mode=OneWay}" Width="190" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="ms-appx:///Assets/Icons/Start.png"
+                                       Width="25"
+                                       Height="25"
+                                       VerticalAlignment="Center"/>
 
-                            <TextBlock Text="Ranking"
-                                       VerticalAlignment="Center"
-                                       Margin="8,0,0,0" />
-                        </StackPanel>
-                    </Button>
+                                <TextBlock Text="Start"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel Spacing="10">
+                        <Button Click="ShowGameControls" Width="190" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="ms-appx:///Assets/Icons/Control.png"
+                                       Width="45"
+                                       Height="25"
+                                       VerticalAlignment="Center"/>
+
+                                <TextBlock Text="Controls"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="ShowScoreRankingDialog" Width="190" FontFamily="{StaticResource GameFont}" HorizontalAlignment="Center" Background="#ffe200" Foreground="#007a8e" CornerRadius="12" FontSize="20" Padding="16 12 16 8">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="ms-appx:///Assets/Icons/RankingIcon.png"
+                                       Width="25"
+                                       Height="25"
+                                       VerticalAlignment="Center"/>
+
+                                <TextBlock Text="Ranking"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
         </Grid>
