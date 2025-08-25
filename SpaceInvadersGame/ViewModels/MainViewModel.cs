@@ -194,14 +194,14 @@ public partial class MainViewModel : ObservableObject
         var enemyModel = new Enemy
         {
             PositionX = 800,
-            PositionY = 10,
+            PositionY = -50,
             Type = EnemyType.SPECIAL,
             Speed = 50
         };
         
         Image enemyImage = new Image
         {
-            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/SpecialEnemy.png")),
+            Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/SpecialEnemy2.png")),
             Width = 45,
             Height = 45,
         };
@@ -320,11 +320,11 @@ public partial class MainViewModel : ObservableObject
 
     private void CreateObstacle()
     {
-        const int columns = 3;
+        const int columns = 4;
         const int rows = 1;
         const int obstacleWidth = 150;
         const int obstacleHeight = 45;
-        const double spacing = 150;
+        const double spacing = 115;
         
         for (int i = 0; i < rows; i++)
         {
