@@ -238,11 +238,11 @@ O jogo foi arquitetado seguindo o Padrão MVVM (Main-View-ViewModel), prezando p
 
 # 🗒️ Manual: Como jogar
 
-| Ação                         | Tecla                        |
-|------------------------------|------------------------------|
-| Movimentação para a esquerda | <kbd>-></kbd> ou <kbd>D</kbd> |
-| Movimentação para a difeira  | <kbd><-</kbd> ou <kbd>A</kbd> |
-| Atirar um projétil           | <kbd>Space</kbd>             |
+| Ação                         | Tecla                       |
+|------------------------------|-----------------------------|
+| Movimentação para a esquerda | <kbd>⇦</kbd> ou <kbd>D</kbd> |
+| Movimentação para a direita  | <kbd>⇨</kbd> ou <kbd>A</kbd> |
+| Atirar um projétil           | <kbd>Space</kbd>            |
 
 # 📸 Capturas de Tela
 
@@ -257,4 +257,4 @@ O jogo foi arquitetado seguindo o Padrão MVVM (Main-View-ViewModel), prezando p
 <img src="https://res.cloudinary.com/dcxlgeobi/image/upload/fit2gdn0l4urd4zw4xuy.png">
 
 ## Tela de Game Over
-<img src="https://res.cloudinary.com/dcxlgeobi/image/upload/coa1iyxxvdf0wcosg9g4.png">
+<img src="https://res.cloudinary.com/dcxlgeobi/image/upload/baitx7rtvo5xami7nxkz.png">
