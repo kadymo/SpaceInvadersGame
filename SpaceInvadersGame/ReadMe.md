@@ -156,6 +156,7 @@ O objetivo do jogo é fornecer um meio de entretenimento interativo, divertido, 
 ## 📂 Estrutura de Diretórios
 
 - Assets:
+  - Armazenamento de recursos não essenciais e estáticos
   - Arquivos de fontes, imagens e sons
 - Models:
   - Definição das entidades do jogo, incluindo personagens e componentes (`Player`, `Enemy`, `Obstacle`, etc.)
@@ -178,8 +179,15 @@ O objetivo do jogo é fornecer um meio de entretenimento interativo, divertido, 
     │   └── Sounds/
     ├── Models/
     │   ├── Enums/
+    │   │   ├── EnemyType.cs
+    │   │   └── ProjectileFirer.cs
     │   ├── Interfaces/
-    │   └── ...
+    │   │   └── IPositionable.cs
+    │   ├── GameObject.cs
+    │   ├── Enemy.cs
+    │   ├── Obstacle
+    │   ├── Player.cs
+    │   └── Projectile.cs
     ├── Presentation/
     │   ├── MainPage.xaml
     │   ├── MainPage.xaml.cs
