@@ -1,6 +1,7 @@
 using Windows.Foundation;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Imaging;
 using SpaceInvadersGame.Models;
 using SpaceInvadersGame.Presentation;
 using SpaceInvadersGame.ViewModels;
@@ -10,12 +11,15 @@ namespace SpaceInvadersGame;
 public sealed partial class MainPage : Page
 {
     private DateTime _lastFrameTime;
+    private StackPanel _livesPanel;
     
     public MainPage()
     {
         this.InitializeComponent();
         ViewModel = new MainViewModel();
         this.DataContext = ViewModel;
+        
+        CreateLivesPanel();
         
         this.Loaded += OnPageLoaded;
         this.Unloaded += OnPageUnloaded;
@@ -31,6 +35,38 @@ public sealed partial class MainPage : Page
         ViewModel.ExplosionEffectCreated += OnExplosionEffectCreated;
         ViewModel.ExplosionEffectRemoved += OnExplosionEffectRemoved;
         ViewModel.GameOver += OnGameOver;
+        ViewModel.LifesChanged += OnLifesChanged;
+    }
+    
+    private void CreateLivesPanel()
+    {
+        _livesPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            Margin = new Thickness(20, 20, 0, 0)
+        };
+        
+        HeaderGrid.Children.Remove(Lifes); 
+        Grid.SetColumn(_livesPanel, 2); 
+        _livesPanel.Margin = new Thickness(40, 20, 0, 0); 
+        HeaderGrid.Children.Add(_livesPanel);
+    }
+    
+    private void UpdateLifesDisplay(int lifes)
+    {
+        _livesPanel.Children.Clear();
+        
+        for (int i = 0; i < lifes; i++)
+        {
+            Image lifeImage = new Image
+            {
+                Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/Life.png")), // ou Life.png, PlayerShip.png, etc.
+                Width = 30,
+                Height = 30,
+            };
+            _livesPanel.Children.Add(lifeImage);
+        }
     }
     
     // Page Event Handlers
@@ -43,7 +79,8 @@ public sealed partial class MainPage : Page
 
         Score.Text = "SCORE: 0";
         Wave.Text = "WAVE: 1";
-        Lifes.Text = "LIFES: 3";
+        UpdateLifesDisplay(3);
+        // Lifes.Text = "LIFES: 3";
         
         ViewModel.Start();
         
@@ -77,6 +114,11 @@ public sealed partial class MainPage : Page
         
         var bounds = new Rect(0, 0, (float)GameCanvas.ActualWidth, (float)GameCanvas.ActualHeight);
         ViewModel.Update(deltaTime, bounds);
+    }
+
+    private void OnLifesChanged(object? sender, int value)
+    {
+        UpdateLifesDisplay(value);
     }
     
     // Keyboard Event Handlers

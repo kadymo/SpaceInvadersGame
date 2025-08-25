@@ -22,7 +22,7 @@
               <RowDefinition/>
           </Grid.RowDefinitions>
 
-          <Grid ColumnSpacing="10" >
+          <Grid x:Name="HeaderGrid" ColumnSpacing="10" >
               <Grid.ColumnDefinitions>
                   <ColumnDefinition />
                   <ColumnDefinition />

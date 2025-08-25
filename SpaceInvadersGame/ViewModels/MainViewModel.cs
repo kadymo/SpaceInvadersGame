@@ -23,8 +23,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _username;
 
-    [ObservableProperty]
-    private string _lifes;
+    // [ObservableProperty]
+    // private string _lifes;
     
     private readonly List<GameObject> _gameObjects = new List<GameObject>();
     public List<GameObject> GameObjects => _gameObjects;
@@ -62,6 +62,8 @@ public partial class MainViewModel : ObservableObject
     public event EventHandler<FrameworkElement> ExplosionEffectCreated;
     public event EventHandler<FrameworkElement> ExplosionEffectRemoved;
 
+    public event EventHandler<int> LifesChanged;
+    
     public event EventHandler<GameOverEventArgs> GameOver;
 
     public void Start()
@@ -95,9 +97,8 @@ public partial class MainViewModel : ObservableObject
     
     private async void OnProjectileHitEnemy(object? sender, CollisionEventArgs collisionData)
     {
-        Lifes = "LIFES: " + _gameManager.Lifes;
+        LifesChanged?.Invoke(this, _gameManager.Lifes);        
         Score = "SCORE: " + _gameManager.Score;
-        
         var projectile = collisionData.Projectile;
         var enemy = collisionData.EnemyTarget;
 
@@ -138,8 +139,8 @@ public partial class MainViewModel : ObservableObject
         ProjectileRemoved?.Invoke(this, projectile);
         
         player.Model.Lifes -= 1;
-        Lifes = "LIFES: " + _gameManager.Lifes;
-
+        LifesChanged?.Invoke(this, _gameManager.Lifes);
+        
         if (player.Model.Lifes <= 0)
         {
             PlayerRemoved?.Invoke(this, player);
@@ -239,7 +240,7 @@ public partial class MainViewModel : ObservableObject
 
     private void OnLifesIncreased()
     {
-        Lifes = "LIFES: " + _gameManager.Lifes;
+        LifesChanged?.Invoke(this, _gameManager.Lifes);    
     }
 
     private void OnWaveEnd()
