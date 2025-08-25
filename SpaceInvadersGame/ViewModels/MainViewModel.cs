@@ -8,7 +8,7 @@ namespace SpaceInvadersGame.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private readonly GameManager _gameManager;
+    private GameManager _gameManager;
     private readonly InputManager _inputManager;
     private readonly SoundManager _soundManager;
     
@@ -26,13 +26,19 @@ public partial class MainViewModel : ObservableObject
     // [ObservableProperty]
     // private string _lifes;
     
-    private readonly List<GameObject> _gameObjects = new List<GameObject>();
+    private List<GameObject> _gameObjects = new List<GameObject>();
     public List<GameObject> GameObjects => _gameObjects;
     
     public MainViewModel()
     {
         _inputManager = new InputManager();
         _soundManager = new SoundManager();
+       
+        InitializeGameManager();
+    }
+    
+    private void InitializeGameManager()
+    {
         _gameManager = new GameManager(_gameObjects, _inputManager, _soundManager);
         
         _gameManager.ProjectileFired += OnProjectileFired;
@@ -65,6 +71,7 @@ public partial class MainViewModel : ObservableObject
     public event EventHandler<int> LifesChanged;
     
     public event EventHandler<GameOverEventArgs> GameOver;
+    public event EventHandler GameRestarted;
 
     public void Start()
     {
@@ -73,11 +80,63 @@ public partial class MainViewModel : ObservableObject
         CreatePlayer();
         CreateEnemy();
         CreateObstacle();
+        
+        Score = "SCORE: " + _gameManager.Score;
+        Wave = "WAVE: " + _gameManager.Wave;
+        LifesChanged?.Invoke(this, _gameManager.Lifes);
     }
     
     public void Stop()
     {
         _gameManager.Stop();
+    }
+    
+    public void RestartGame()
+    {
+        _gameManager.Stop();
+        
+        ClearGameObjects();
+        
+        _gameObjects = new List<GameObject>();
+        
+        InitializeGameManager();
+        
+        GameRestarted?.Invoke(this, EventArgs.Empty);
+        
+        Start();
+    }
+    
+    private void ClearGameObjects()
+    {
+        var players = _gameObjects.OfType<PlayerGameObject>().ToList();
+        foreach (var player in players)
+        {
+            _gameObjects.Remove(player);
+            PlayerRemoved?.Invoke(this, player);
+        }
+        
+        var enemies = _gameObjects.OfType<EnemyGameObject>().ToList();
+        foreach (var enemy in enemies)
+        {
+            _gameObjects.Remove(enemy);
+            EnemyRemoved?.Invoke(this, enemy);
+        }
+        
+        var projectiles = _gameObjects.OfType<ProjectileGameObject>().ToList();
+        foreach (var projectile in projectiles)
+        {
+            _gameObjects.Remove(projectile);
+            ProjectileRemoved?.Invoke(this, projectile);
+        }
+        
+        var obstacles = _gameObjects.OfType<ObstacleGameObject>().ToList();
+        foreach (var obstacle in obstacles)
+        {
+            _gameObjects.Remove(obstacle);
+            ObstacleRemoved?.Invoke(this, obstacle);
+        }
+        
+        _gameObjects.Clear();
     }
     
     public void Update(TimeSpan deltaTime, Rect bounds)

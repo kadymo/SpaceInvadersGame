@@ -34,8 +34,9 @@ public sealed partial class MainPage : Page
         ViewModel.ObstacleRemoved += OnObstacleRemoved;
         ViewModel.ExplosionEffectCreated += OnExplosionEffectCreated;
         ViewModel.ExplosionEffectRemoved += OnExplosionEffectRemoved;
-        ViewModel.GameOver += OnGameOver;
         ViewModel.LifesChanged += OnLifesChanged;
+        ViewModel.GameOver += OnGameOver;
+        ViewModel.GameRestarted += OnGameRestarted;
     }
     
     private void CreateLivesPanel()
@@ -80,7 +81,6 @@ public sealed partial class MainPage : Page
         Score.Text = "SCORE: 0";
         Wave.Text = "WAVE: 1";
         UpdateLifesDisplay(3);
-        // Lifes.Text = "LIFES: 3";
         
         ViewModel.Start();
         
@@ -93,6 +93,13 @@ public sealed partial class MainPage : Page
     {
         CompositionTarget.Rendering -= OnRendering;
         ViewModel.Stop();
+    }
+
+    private void InitializeGameUI()
+    {
+        Score.Text = "SCORE: 0";
+        Wave.Text = "WAVE: 1";
+        UpdateLifesDisplay(3);
     }
     
     // Navigation Handlers
@@ -119,6 +126,13 @@ public sealed partial class MainPage : Page
     private void OnLifesChanged(object? sender, int value)
     {
         UpdateLifesDisplay(value);
+    }
+    
+    private void OnGameRestarted(object? sender, EventArgs e)
+    {
+        GameCanvas.Children.Clear();
+        InitializeGameUI();
+        this.Focus(FocusState.Programmatic);
     }
     
     // Keyboard Event Handlers
@@ -182,27 +196,61 @@ public sealed partial class MainPage : Page
         ShowGameOverDialog();
     }
 
+    // private async void ShowGameOverDialog()
+    // {
+    //     ContentDialog gameOverDialog = new ContentDialog
+    //     {
+    //         Title = "Game Over",
+    //         Content = Score.Text,
+    //         PrimaryButtonText = "Menu",
+    //         SecondaryButtonText = "Salvar pontuação",
+    //         XamlRoot = this.XamlRoot,
+    //     };
+    //     
+    //     ContentDialogResult result = await gameOverDialog.ShowAsync();
+    //     if (result == ContentDialogResult.Primary)
+    //     {
+    //         ViewModel.Stop();
+    //         this.Frame.Navigate(typeof(MenuPage));
+    //     }  else if (result == ContentDialogResult.Secondary)
+    //     {
+    //         await ViewModel.SaveScoreAsync();
+    //         ViewModel.Stop();
+    //         this.Frame.Navigate(typeof(MenuPage));
+    //     } 
+    // }
+    
     private async void ShowGameOverDialog()
     {
         ContentDialog gameOverDialog = new ContentDialog
         {
             Title = "Game Over",
             Content = Score.Text,
-            PrimaryButtonText = "Menu",
-            SecondaryButtonText = "Salvar pontuação",
+            PrimaryButtonText = "Jogar Novamente",
+            SecondaryButtonText = "Menu",
+            CloseButtonText = "Salvar Pontuação",
             XamlRoot = this.XamlRoot,
         };
         
         ContentDialogResult result = await gameOverDialog.ShowAsync();
+        
         if (result == ContentDialogResult.Primary)
         {
+            // Jogar Novamente
+            ViewModel.RestartGame();
+        }
+        else if (result == ContentDialogResult.Secondary)
+        {
+            // Menu
             ViewModel.Stop();
             this.Frame.Navigate(typeof(MenuPage));
-        }  else if (result == ContentDialogResult.Secondary)
+        }
+        else if (result == ContentDialogResult.None)
         {
+            // Salvar Pontuação (CloseButton)
             await ViewModel.SaveScoreAsync();
             ViewModel.Stop();
             this.Frame.Navigate(typeof(MenuPage));
-        } 
+        }
     }
 }
