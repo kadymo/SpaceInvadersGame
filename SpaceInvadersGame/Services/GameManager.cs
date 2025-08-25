@@ -310,7 +310,7 @@ public class GameManager
                 break;
         }
 
-        return new Rect(x, y, gameObject.View.Width, gameObject.View.Height);
+        return new Rect(x, y, gameObject.View.ActualWidth, gameObject.View.ActualHeight);
 
     }
     
@@ -320,16 +320,6 @@ public class GameManager
     {
         if (!GetPlayers().ToList().Any()) return;
         var player = GetPlayers().ToList().First();
-        
-        if (_inputManager.isKeyPressed(VirtualKey.W) || _inputManager.isKeyPressed(VirtualKey.Up))
-        {
-            player.Model.PositionY -= player.Model.Speed * deltaTimeSeconds;
-        }
-
-        if (_inputManager.isKeyPressed(VirtualKey.S) || _inputManager.isKeyPressed(VirtualKey.Down))
-        {
-            player.Model.PositionY += player.Model.Speed * deltaTimeSeconds;
-        }
         
         if (_inputManager.isKeyPressed(VirtualKey.A) || _inputManager.isKeyPressed(VirtualKey.Left)) 
         {
