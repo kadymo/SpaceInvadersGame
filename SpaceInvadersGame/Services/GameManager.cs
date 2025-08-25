@@ -55,7 +55,7 @@ public class GameManager
 
         this.ProjectileFired += (sender, projectileModel) =>
         {
-            _soundManager.PlaySound("ProjectileFiredSound.wav");
+            if (projectileModel.Firer == ProjectileFirer.PLAYER) _soundManager.PlaySound("ProjectileFiredSound.wav");
         };
 
         this.ProjectileExceededScreen += (sender, gameObject) =>
@@ -348,6 +348,7 @@ public class GameManager
             {
                 enemy.Model.PositionX -= correction;
                 enemy.Model.Speed += 1;
+                enemy.Model.FireSpeed += 1;
             }
             
             _swarmDirection = -1.0f;
@@ -360,6 +361,7 @@ public class GameManager
             {
                 enemy.Model.PositionX += correction;
                 enemy.Model.Speed += 1;
+                enemy.Model.FireSpeed += 1;
             }
             
             _swarmDirection = 1.0f;
@@ -448,13 +450,14 @@ public class GameManager
         
         Random random = new Random();
         var enemyIndex = random.Next(0, highEnemies.Count());
+        var enemy = highEnemies.ElementAt(enemyIndex);
 
         var projectileModel = new Projectile 
         { 
-            PositionX = highEnemies.ElementAt(enemyIndex).Model.PositionX, 
-            PositionY = highEnemies.ElementAt(enemyIndex).Model.PositionY, 
-            Firer = ProjectileFirer.ENEMY 
-            
+            PositionX = enemy.Model.PositionX, 
+            PositionY = enemy.Model.PositionY, 
+            Firer = ProjectileFirer.ENEMY,
+            Speed = enemy.Model.FireSpeed,
         };
         ProjectileFired?.Invoke(this, projectileModel); 
         

@@ -9,5 +9,6 @@ public class Enemy : IPositionable
     public double PositionY { get; set; }
     public double Health { get; set; } = 100;
     public double Speed { get; set; } = 15;
+    public double FireSpeed { get; set; } = 150;
     public EnemyType Type { get; set; }
 }
