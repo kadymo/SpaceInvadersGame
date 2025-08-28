@@ -40,6 +40,7 @@ public class GameManager
 
     private double _swarmDirection = 1.0f;
     
+    
     public int Score => GetPlayers().ToList().First().Model.Score;
     public int Lifes => GetPlayers().ToList().First().Model.Lifes;
     public int Wave = 1;
@@ -63,18 +64,19 @@ public class GameManager
             switch (collisionData.EnemyTarget.Model.Type) 
             { 
                 case EnemyType.LOW: 
-                    player.Model.Score += 10; 
+                    player.Model.Score += 5; 
                     break;
                 case EnemyType.MEDIUM: 
-                    player.Model.Score += 20; 
+                    player.Model.Score += 10; 
                     break;
                 case EnemyType.HIGH: 
-                    player.Model.Score += 40; 
+                    player.Model.Score += 20; 
                     break;
                 case EnemyType.SPECIAL:
-                    player.Model.Score += 120;
+                    player.Model.Score += 50;
                     break;
                 }
+            
 
             var previousScoreDouble = (double)previousScore / 1000;
             var scoreDouble = (double)player.Model.Score / 1000;
